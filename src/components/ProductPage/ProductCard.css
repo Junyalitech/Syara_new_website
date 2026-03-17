@@ -1,0 +1,129 @@
+.product-card {
+  display: flex;
+  gap: 16px;
+  background: hsl(var(--card) / 0.9);
+  border: 1px solid hsl(var(--border));
+  border-radius: 14px;
+  padding: 14px;
+  transition: all 0.25s ease;
+  backdrop-filter: blur(10px);
+}
+
+/* HOVER EFFECT */
+.product-card:hover {
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  transform: translateY(-3px);
+}
+
+/* LEFT IMAGE */
+.product-card__left {
+  position: relative;
+}
+
+.product-card__image {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 12px;
+  background: #f5f5f5;
+}
+
+/* BADGE */
+.product-card__badge {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  background: hsl(var(--primary));
+  color: white;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+
+/* RIGHT */
+.product-card__right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* TOP */
+.product-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.product-card__wishlist {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: 0.2s;
+}
+
+.product-card__wishlist:hover {
+  color: red;
+  opacity: 1;
+}
+
+/* NAME */
+.product-card__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  margin-bottom: 6px;
+}
+
+/* RATING */
+.product-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 12px;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 6px;
+}
+
+/* PRICE */
+.product-card__pricing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-card__price {
+  font-size: 18px;
+  font-weight: 700;
+  color: hsl(var(--primary));
+}
+
+.product-card__old-price {
+  font-size: 13px;
+  color: hsl(var(--muted-foreground));
+  text-decoration: line-through;
+}
+
+/* ACTION */
+.product-card__actions {
+  margin-top: 10px;
+}
+
+.product-card__add-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: hsl(var(--primary));
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.product-card__add-btn:hover {
+  background: hsl(var(--primary) / 0.9);
+  transform: scale(1.05);
+}

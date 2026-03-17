@@ -1,0 +1,33 @@
+.gm-shop {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 60px 20px;
+}
+
+.gm-shop .gm-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.gm-load-more {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.gm-load-more button {
+  background: #4caf50;
+  color: #fff;
+  border: none;
+  padding: 12px 40px;
+  border-radius: 30px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.gm-load-more button:hover {
+  background: #43a047;
+}

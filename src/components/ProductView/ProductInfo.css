@@ -1,0 +1,328 @@
+.product-info{
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+  padding:10px 5px;
+}
+
+/* Title */
+.product-title{
+  font-size:24px;
+  font-weight:600;
+  color:#1a1a1a;
+  line-height:1.3;
+}
+
+.product-title{
+  font-size:22px;
+  font-weight:600;
+  color:#222;
+}
+
+.product-meta{
+  font-size:13px;
+  color:#777;
+}
+
+/* Meta */
+.product-meta{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-top:6px;
+  color:#8a8a8a;
+  font-size:13px;
+}
+
+.rating-count{
+  color:#999;
+}
+
+/* Rating */
+.rating{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.stars{
+  display:flex;
+}
+
+.star{
+  width:16px;
+  height:16px;
+  fill:#ddd;
+}
+
+.star.filled{
+  fill:#ffc107;
+}
+
+.rating-count{
+  font-size:13px;
+  color:#666;
+}
+
+/* Price */
+.price-box{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.old-price{
+  font-size:15px;
+  color:#bbb;
+}
+
+.new-price{
+  font-size:30px;
+  font-weight:700;
+  color:#6c63ff;
+  letter-spacing:0.5px;
+}
+/* Stock */
+.stock{
+  font-size:13px;
+  color:#666;
+}
+
+.stock span{
+  background:#f1f3ff;
+  color:#6c63ff;
+  padding:3px 8px;
+  border-radius:6px;
+  font-weight:600;
+}
+
+/* Description */
+.product-desc{
+  font-size:14px;
+  color:#666;
+  line-height:1.6;
+}
+
+/* Cart Section */
+.cart-section{
+  display:flex;
+  align-items:center;
+  gap:16px;
+}
+
+/* Quantity */
+.qty-box{
+  display:flex;
+  align-items:center;
+  border:1px solid #e6e6e6;
+  border-radius:8px;
+  overflow:hidden;
+  background:#fafafa;
+}
+
+.qty-box button{
+  padding:10px;
+  border:none;
+  background:transparent;
+  cursor:pointer;
+  transition:all .2s;
+}
+
+.qty-box button:hover{
+  background:#f0f0f0;
+}
+
+.qty-box span{
+  width:40px;
+  text-align:center;
+  font-weight:500;
+}
+
+/* Add to cart */
+.add-cart{
+  background:linear-gradient(135deg,#6c63ff,#5a52e0);
+  color:white;
+  border:none;
+  padding:12px 26px;
+  border-radius:8px;
+  font-size:14px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all .25s ease;
+  box-shadow:0 4px 14px rgba(108,99,255,0.3);
+}
+
+.add-cart:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(108,99,255,0.35);
+}
+
+/* Features */
+.features{
+  font-size:14px;
+  color:#555;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+
+/* Payment */
+.payment-box{
+  border:1px solid #eee;
+  border-radius:10px;
+  padding:14px;
+  background:#fafafa;
+  transition:all .2s;
+}
+
+.payment-box:hover{
+  box-shadow:0 6px 20px rgba(0,0,0,0.05);
+}
+
+.payment-box p{
+  font-weight:500;
+  margin-bottom:10px;
+  color:#333;
+}
+
+.payments{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.payments span{
+  padding:6px 10px;
+  border:1px solid #e0e0e0;
+  border-radius:6px;
+  font-size:11px;
+  background:white;
+}
+.qty-box{
+  border:1px solid #ddd;
+  border-radius:6px;
+}
+
+.qty-box button{
+  background:none;
+}
+
+.add-cart{
+  background:#6c63ff;
+  color:white;
+  border:none;
+  padding:10px 22px;
+  border-radius:6px;
+  font-size:14px;
+  font-weight:500;
+  transition:.2s;
+}
+
+.add-cart:hover{
+  background:#5a52e0;
+}
+
+.features{
+  font-size:13px;
+  color:#666;
+}
+
+.payment-box{
+  border:1px solid #eee;
+  border-radius:8px;
+  padding:12px;
+  background:#fafafa;
+}
+
+.payments span{
+  font-size:11px;
+  padding:5px 8px;
+}
+
+.payments{
+  display:flex;
+  gap:12px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.payments img{
+  height:26px;
+  width:auto;
+  object-fit:contain;
+  padding:6px 10px;
+  background:white;
+  border:1px solid #eee;
+  border-radius:6px;
+  transition:all .25s ease;
+}
+
+.payments img{
+  height:20px;
+  padding:0;
+  border:none;
+  background:transparent;
+}
+
+/* Hover */
+.payments img:hover{
+  transform:translateY(-2px) scale(1.05);
+  box-shadow:0 6px 14px rgba(0,0,0,0.08);
+}
+
+@media(max-width:768px){
+
+  .product-title{
+    font-size:18px;
+  }
+
+  .new-price{
+    font-size:22px;
+  }
+
+  .product-meta{
+    gap:8px;
+    font-size:12px;
+  }
+
+  .product-desc{
+    font-size:13px;
+  }
+}
+
+@media(max-width:600px){
+
+  .cart-section{
+    flex-direction:column;
+    align-items:stretch;
+    gap:12px;
+  }
+
+  .add-cart{
+    width:100%;
+    text-align:center;
+  }
+
+  .qty-box{
+    width:100%;
+    justify-content:space-between;
+  }
+
+  .qty-box span{
+    flex:1;
+  }
+}
+
+
+@media(max-width:500px){
+
+  .payments{
+    flex-wrap:wrap;
+  }
+
+  .payments span{
+    flex:1 1 auto;
+    text-align:center;
+  }
+}

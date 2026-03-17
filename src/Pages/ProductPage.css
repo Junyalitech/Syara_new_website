@@ -1,0 +1,22 @@
+.products-page {
+  min-height: 100vh;
+  background: hsl(var(--background));
+}
+
+.products-page__main {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+
+.products-page__content {
+  display: flex;
+  gap: 32px;
+  margin-top: 28px;
+}
+
+@media (max-width: 768px) {
+  .products-page__content {
+    flex-direction: column;
+  }
+}

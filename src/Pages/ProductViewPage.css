@@ -1,0 +1,31 @@
+.pv-page{
+  /* background:#f5f5f7; */
+}
+
+.pv-container{
+  max-width:1300px;
+  margin:auto;
+  padding:40px 20px;
+  background:white;
+  border-radius:12px;
+}
+
+.pv-top{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:40px;
+  align-items:flex-start;
+}
+
+@media (max-width: 900px){
+  .pv-top{
+    grid-template-columns:1fr;
+    gap:30px;
+  }
+}
+
+@media (max-width: 500px){
+  .pv-container{
+    padding:20px 12px;
+  }
+}

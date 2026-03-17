@@ -1,0 +1,44 @@
+/* Section */
+.tp-section{
+  margin-top:60px;
+}
+
+/* Header */
+.tp-header{
+  margin-bottom:25px;
+}
+
+.tp-header h2{
+  font-size:22px;
+  font-weight:600;
+  color:#222;
+  margin-bottom:6px;
+}
+
+/* underline */
+.tp-line{
+  width:50px;
+  height:3px;
+  background:#6c63ff;
+  border-radius:2px;
+}
+
+/* Grid */
+.tp-grid{
+  display:grid;
+  grid-template-columns:repeat(5, 1fr);
+  gap:16px;
+}
+
+/* Responsive */
+@media(max-width:1024px){
+  .tp-grid{
+    grid-template-columns:repeat(4,1fr);
+  }
+}
+
+@media(max-width:768px){
+  .tp-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
