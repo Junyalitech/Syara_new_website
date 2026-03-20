@@ -22,6 +22,11 @@ const TopProducts: React.FC = () => {
     navigate('/product/aptamil')
   }
 
+  const viewAllProducts = () => {
+    navigate(`/products/Products`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <section className="gm-top-products">
       <div className="gm-section-title">
@@ -52,7 +57,7 @@ const TopProducts: React.FC = () => {
 
       {visibleCount < filtered.length && (
         <div className="gm-view-more">
-          <button onClick={() => setVisibleCount((prev) => prev + 4)}>
+          <button onClick={() => viewAllProducts()}>
             View More
           </button>
         </div>

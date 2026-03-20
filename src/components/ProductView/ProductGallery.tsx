@@ -18,13 +18,37 @@ const ProductGallery: React.FC<ProductGalleryProps> = ({ images, name }) => {
           ❤
         </button>
 
+        <button
+          className="pg-arrow left"
+          onClick={() =>
+            setSelectedIndex((prev) =>
+              prev === 0 ? images.length - 1 : prev - 1
+            )
+          }
+        >
+          ‹
+        </button>
+
         <img
           src={images[selectedIndex]}
           alt={name}
           className="pg-main-img"
         />
 
+        <button
+          className="pg-arrow right"
+          onClick={() =>
+            setSelectedIndex((prev) =>
+              prev === images.length - 1 ? 0 : prev + 1
+            )
+          }
+        >
+          ›
+        </button>
+
       </div>
+
+
 
       <div className="pg-thumbnails">
         {images.map((img, i) => (

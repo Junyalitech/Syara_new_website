@@ -30,7 +30,7 @@
 
 /* Active */
 .pt-tab.active{
-  color:#6c63ff;
+  color:#42a545;
 }
 
 /* Animated underline */
@@ -41,7 +41,7 @@
   left:0;
   width:0%;
   height:2px;
-  background:#6c63ff;
+  background:#42a545;
   transition:width .3s ease;
 }
 

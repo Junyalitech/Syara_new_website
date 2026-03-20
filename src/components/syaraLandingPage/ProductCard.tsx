@@ -1,24 +1,26 @@
 import React from 'react';
-import type { Product } from '@/data/products';
+import type { Product } from '../../data/products';
 import { Heart, ShoppingCart } from "lucide-react";
 import './ProductCard.css';
 import { useNavigate } from 'react-router-dom';
-
+import { useCart } from "../../context/CartContext";
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  const { addToCart } = useCart();
   const navigate = useNavigate()
   const discount =
     product.oldPrice
       ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
       : null;
 
+      
 
   const productview = () => {
     navigate('/product/aptamil');
-     window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   return (
@@ -52,7 +54,12 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         )}
       </div>
 
-      <button className="gm-add-cart-btn">
+      <button className="gm-add-cart-btn"
+        onClick={(e) => {
+          e.stopPropagation(); // prevent navigation
+          addToCart(product);
+        }}
+      >
         <ShoppingCart size={16} />
         Add to Cart
       </button>

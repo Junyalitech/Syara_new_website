@@ -150,7 +150,30 @@
   margin: 2px 0 0 0;
 }
 
+.footer-skeleton div {
+  height: 14px;
+  background: #444;
+  margin-bottom: 10px;
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
 
+.footer-skeleton div::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 150%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.2),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
 
 @media (max-width: 768px) {
   .gm-features-grid { grid-template-columns: repeat(2, 1fr); }

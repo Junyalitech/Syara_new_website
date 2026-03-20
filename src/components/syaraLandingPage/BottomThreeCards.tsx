@@ -3,6 +3,7 @@ import chipsImg from '../../assets/BottomThreeCards/chips-product.png';
 import citrusImg from '../../assets/BottomThreeCards/citrus-product.png';
 import coffeeImg from '../../assets/BottomThreeCards/coffee-product.png';
 import { Truck, Leaf, ShieldCheck, Headphones } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const cards = [
   { img: chipsImg, subtitle: 'Crunchy Bites', title: 'Fresh Products', discount: 'Up to 30% Off', theme: 'card-orange' },
@@ -12,6 +13,13 @@ const cards = [
 
 
 const BottomThreeCards = () => {
+  const navigate = useNavigate();
+
+  const viewAllProducts = ({ category }) => {
+    navigate(`/products/${category}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <section className="fresh-products-section">
       <div className="product-cards">
@@ -22,12 +30,12 @@ const BottomThreeCards = () => {
               <p className="subtitle">{card.subtitle}</p>
               <h2>{card.title}</h2>
               <p className="discount">{card.discount}</p>
-              <button className="shop-now-btn">Shop Now</button>
+              <button onClick={()=>viewAllProducts({ category: card.title })} className="shop-now-btn">Shop Now</button>
             </div>
           </div>
         ))}
       </div>
-     
+
     </section>
   );
 };

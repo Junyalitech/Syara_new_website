@@ -124,7 +124,7 @@
 }
 
 .cd-price{
-  color:#6c63ff;
+  color:#4caf50;
   font-weight:600;
   margin-top:4px;
 }
@@ -186,7 +186,7 @@
 .cd-checkout{
   width:100%;
   height:48px;
-  background:#6c63ff;
+  background:#4caf50;
   color:white;
   border:none;
   border-radius:8px;
@@ -196,5 +196,5 @@
 }
 
 .cd-checkout:hover{
-  background:#5a52e0;
+  background:#307533;
 }

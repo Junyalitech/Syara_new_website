@@ -2,19 +2,25 @@ import React, { useState } from 'react';
 import { products } from '../../data/products';
 import ProductCard from './ProductCard';
 import './ShopSection.css';
+import { useNavigate } from 'react-router-dom';
 
 const tabs = ['All', 'Fruits', 'Vegetables', 'Grocery', 'Drinks'];
 
 const ShopSection: React.FC = () => {
   const [activeTab, setActiveTab] = useState('All');
   const [visibleCount, setVisibleCount] = useState(10); // 1 row products
-  
+  const navigate = useNavigate();
 
   const filtered = activeTab === 'All'
     ? products
     : products.filter(p => p.category === activeTab.toLowerCase());
 
   const visibleProducts = filtered.slice(0, visibleCount);
+
+   const viewAllProducts = ({category}) => {
+    navigate(`/products/${category}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <section className="gm-shop">
@@ -38,7 +44,7 @@ const ShopSection: React.FC = () => {
           <ProductCard key={product.id} product={product} />
         ))}
       </div>
-      <div className="gm-view-more">
+      <div className="gm-view-more" onClick={()=>viewAllProducts({category: 'Products'})}>
         <button>Load More</button>
       </div>
     </section>

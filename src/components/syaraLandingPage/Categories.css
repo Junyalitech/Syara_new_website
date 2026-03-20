@@ -28,6 +28,7 @@
 
 .gm-categories-grid {
   display: flex;
+  justify-content: center;
   gap: 48px;
   overflow-x: auto;
   scroll-behavior: smooth;
@@ -105,6 +106,12 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
 }
 
+.gm-category-icon img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+}
+
 .gm-category-name {
   font-size: 14px;
   font-weight: 600;
@@ -113,4 +120,38 @@
 
 .gm-category-item {
   flex: 0 0 auto;
+}
+
+/* CATEGORY SKELETON */
+.cat-skeleton {
+  min-width: 120px;
+  height: 120px;
+  background: #e5e5e5;
+  border-radius: 12px;
+  margin-right: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* SHIMMER EFFECT */
+.cat-skeleton::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -150%;
+  height: 100%;
+  width: 150%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.6),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    left: 150%;
+  }
 }

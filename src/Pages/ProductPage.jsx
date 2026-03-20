@@ -5,9 +5,10 @@ import ProductGrid from '../components/ProductPage/ProductGrid';
 import { shopProducts } from '../data/products';
 import './ProductPage.css';
 import { useState } from 'react';
+import { useParams } from "react-router-dom";
 
 const ProductPage = () => {
-
+     const { category } = useParams();
     const [filters, setFilters] = useState({
         category: "",
     });
@@ -30,7 +31,7 @@ const ProductPage = () => {
     return (
         <div className="products-page">
             <main className="products-page__main">
-                <HeroBanner />
+                <HeroBanner category={category} />
                 <div className="products-page__content">
                     <Sidebar filters={filters} setFilters={setFilters} />
                     <ProductGrid products={filteredProducts} />

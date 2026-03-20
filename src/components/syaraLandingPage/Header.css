@@ -48,7 +48,7 @@
 }
 
 .signIn button{
-  background: linear-gradient(135deg,#4caf50,#44a549);
+  background: #44a549;
   padding: 7px 22px;
   color: white;
   border: none;

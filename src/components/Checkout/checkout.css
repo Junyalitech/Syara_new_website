@@ -3,7 +3,7 @@
    ============================================ */
 
 :root {
-  --ck-primary: #0570DE;
+  --ck-primary: #4caf50;
   --ck-bg: #FFFFFF;
   --ck-bg-secondary: #F6F9FC;
   --ck-text: #30313D;
@@ -212,7 +212,7 @@
 .item-price{
   font-size:15px;
   font-weight:600;
-  color:#6c63ff;
+  color:#4caf50;
 }
 
 .item-qty{
@@ -254,7 +254,7 @@
 }
 
 .replace-link a{
-  color:#6c63ff;
+  color:#4caf50;
   text-decoration:none;
   font-weight:500;
   margin-left:4px;
@@ -328,7 +328,7 @@
 
 .promo-apply-btn{
   padding:12px 18px;
-  background:linear-gradient(135deg,#6c63ff,#5a52e0);
+  background:linear-gradient(135deg,#4caf50);
   color:white;
   border:none;
   border-radius:10px;
@@ -374,7 +374,7 @@
 }
 
 .summary-total span:last-child{
-  color:#6c63ff;
+  color:#4caf50;
   font-size:22px;
 }
 
@@ -397,7 +397,7 @@
 
 /* Main CTA */
 .cta-primary--green{
-  background:linear-gradient(135deg,#6c63ff,#5a52e0);
+  background:linear-gradient(135deg,#4caf50);
   color:white;
   box-shadow:0 6px 18px rgba(108,99,255,0.3);
 }

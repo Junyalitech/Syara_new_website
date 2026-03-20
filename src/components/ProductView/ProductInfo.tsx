@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import "./ProductInfo.css";
+import { useCart } from "../../context/CartContext";
+
 
 const StarRating = ({ rating, count }: { rating: number; count: number }) => (
   <div className="rating">
@@ -21,6 +23,7 @@ const StarRating = ({ rating, count }: { rating: number; count: number }) => (
 
 const ProductInfo = () => {
   const [quantity, setQuantity] = useState(1);
+  const { addToCart } = useCart();
 
   return (
     <div className="product-info">
@@ -65,7 +68,11 @@ const ProductInfo = () => {
           </button>
         </div>
 
-        <button className="add-cart">
+        <button className="add-cart"
+          onClick={(e) => {
+            e.stopPropagation(); // prevent navigation
+            addToCart(product);
+          }}>
           Add to Cart
         </button>
 

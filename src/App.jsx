@@ -8,10 +8,13 @@ import HomePage from "./Pages/HomePage";
 import ProductPage from "./Pages/ProductPage";
 import ProductViewPage from "./Pages/ProductViewPage";
 import CheckoutPage from "./Pages/CheckoutPage";
+import ContactUs from "./Pages/ContactPage";
+import { CartProvider } from "./context/CartContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
+  <CartProvider>
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
@@ -20,14 +23,16 @@ const App = () => (
         <Routes>
             <Route path='/' element={<WebsiteLayout/>}>
               <Route index element={<HomePage/>} />
-              <Route path="products" element={<ProductPage/>} />
+              <Route path="products/:category" element={<ProductPage />} />
               <Route path="product/aptamil" element={<ProductViewPage/>} />
               <Route path="checkout" element={<CheckoutPage/>} />
+              <Route path="contact" element={<ContactUs/>} />
             </Route>
         </Routes>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
+  </CartProvider>
 );
 
 export default App;

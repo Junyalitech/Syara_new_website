@@ -67,9 +67,9 @@
   transition:transform .4s ease;
 }
 
-.gm-product-card:hover .gm-product-image{
+/* .gm-product-card:hover .gm-product-image{
   transform:scale(1.08);
-}
+} */
 
 .gm-product-rating{
   display:flex;
@@ -116,7 +116,7 @@
 .gm-add-cart-btn{
   margin-top:14px;
   width:100%;
-  background:linear-gradient(135deg,#4caf50,#2e7d32);
+  background:#4caf50;
   color:#fff;
   border:none;
   padding:10px;

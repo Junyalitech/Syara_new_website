@@ -6,6 +6,8 @@ import apple from '../../assets/products/apple.png'
 import fish from '../../assets/products/fish.png'
 import logo from '../../assets/Logo/logo.png'
 import CartDrawer from './CartDrawer';
+import { AuthModal } from '../Auth/AuthModal';
+import { useCart } from "../../context/CartContext";
 
 const MOCK_CART = [
   { id: 1, name: "Monster Absurd Sweet Bundy Fruit Organic Dry...", price: 3.49, quantity: 1, image: apple },
@@ -15,20 +17,10 @@ const MOCK_CART = [
 const Header = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
-  const [cartItems, setCartItems] = useState(MOCK_CART);
-  const [isLoggedIn,setIsLoggedIn] = useState(true);
-
-  const handleUpdateQuantity = (id, delta) => {
-    setCartItems((prev) =>
-      prev
-        .map((item) => (item.id === id ? { ...item, quantity: Math.max(0, item.quantity + delta) } : item))
-        .filter((item) => item.quantity > 0)
-    );
-  };
-
-  const handleRemove = (id) => {
-    setCartItems((prev) => prev.filter((item) => item.id !== id));
-  };
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const { cartItems, updateQuantity, removeItem } = useCart();
+  const [wishlistOpen, setWishlistOpen] = useState(false);
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -58,9 +50,9 @@ const Header = () => {
             <ul className="gm-nav-links">
               <li><a href="/">Home</a></li>
               <li><a href="#">About</a></li>
-              <li><a href="/products">Shop</a></li>
-              <li><a href="#">Blog</a></li>
-              <li><a href="#">Contact</a></li>
+              {/*  <li><a href="/products">Shop</a></li> */}
+              {/* <li><a href="#">Blog</a></li> */}
+              <li><a href="/contact">Contact</a></li>
             </ul>
 
             <div className="gm-search">
@@ -90,7 +82,7 @@ const Header = () => {
                 </div>
               ) :
                 (
-                  <div className='signIn'>
+                  <div className='signIn' onClick={() => setAuthOpen(true)}>
                     <button>Sign In</button>
                   </div>
                 )
@@ -101,12 +93,14 @@ const Header = () => {
 
       </header>
 
+      <AuthModal open={authOpen} onOpenChange={setAuthOpen} />
+
       <CartDrawer
         open={cartOpen}
         onClose={() => setCartOpen(false)}
         items={cartItems}
-        onUpdateQuantity={handleUpdateQuantity}
-        onRemove={handleRemove}
+        onUpdateQuantity={updateQuantity}
+        onRemove={removeItem}
       />
 
     </>

@@ -1,0 +1,33 @@
+/* Container */
+.otp-container {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+/* Input boxes */
+.otp-input {
+  width: 44px;
+  height: 48px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 12px;
+  border: none;
+  background: #f3f6f6;
+  color: #000;
+  outline: none;
+  transition: all 0.2s ease;
+  margin:  4px 2px;
+}
+
+/* Focus effect (Tailwind: focus:ring-2 focus:ring-ring) */
+.otp-input:focus {
+  box-shadow: 0 0 0 2px #000; /* change color if needed */
+  background: #fff;
+}
+
+/* Optional: hover effect */
+.otp-input:hover {
+  background: #eee;
+}

@@ -86,9 +86,9 @@ const ReviewItems = () => {
             </div>
           ))}
 
-          <div className="replace-link">
+          {/* <div className="replace-link">
             🔄 Replace with <a href="#">Loblaws</a>
-          </div>
+          </div> */}
         </div>
       ))}
     </div>

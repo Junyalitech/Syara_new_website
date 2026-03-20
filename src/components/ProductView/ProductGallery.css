@@ -48,9 +48,9 @@
   transition:transform .4s ease;
 }
 
-.pg-main:hover .pg-main-img{
+/* .pg-main:hover .pg-main-img{
   transform:scale(1.1);
-}
+} */
 
 /* Thumbnails */
 .pg-thumbnails{
@@ -104,8 +104,39 @@
 }
 
 .pg-thumb.active{
-  border-color:#6c63ff; /* purple */
+  border-color:#42a545; /* purple */
 }
+
+/* Arrow base */
+.pg-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  /* background: #7de681; */
+  color: #215b23;
+  font-size: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 2;
+}
+
+/* Left */
+.pg-arrow.left {
+  left: 10px;
+}
+
+/* Right */
+.pg-arrow.right {
+  right: 10px;
+}
+
 
 @media(max-width:768px){
 

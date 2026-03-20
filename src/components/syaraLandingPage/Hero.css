@@ -6,6 +6,79 @@
   overflow: hidden;
 }
 
+/* SKELETON WRAPPER */
+.hero-skeleton {
+  position: relative;
+  height: 420px;
+  width: 100%;
+  overflow: hidden;
+  background: #e5e5e5;
+  border-radius: 12px;
+}
+
+/* SHIMMER EFFECT */
+.hero-shimmer {
+  position: absolute;
+  top: 0;
+  left: -150%;
+  height: 100%;
+  width: 150%;
+  background: linear-gradient(
+    90deg,
+    rgba(229, 229, 229, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(229, 229, 229, 0) 100%
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    left: 150%;
+  }
+}
+
+/* CONTENT SKELETON */
+.hero-content-skeleton {
+  position: absolute;
+  top: 20%;
+  left: 5%;
+  width: 40%;
+  z-index: 2;
+}
+
+/* ELEMENTS */
+.badge-skel {
+  width: 120px;
+  height: 25px;
+  background: #d1d5db;
+  border-radius: 20px;
+  margin-bottom: 15px;
+}
+
+.title-skel {
+  width: 90%;
+  height: 40px;
+  background: #d1d5db;
+  border-radius: 6px;
+  margin-bottom: 15px;
+}
+
+.text-skel {
+  width: 80%;
+  height: 20px;
+  background: #d1d5db;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+.btn-skel {
+  width: 140px;
+  height: 40px;
+  background: #d1d5db;
+  border-radius: 25px;
+}
+
 /* .gm-hero-bg {
   position: absolute;
   inset: 0;
@@ -68,7 +141,7 @@
 }
 
 .gm-hero-btn {
-  background: linear-gradient(135deg, #4caf50, #2e7d32);
+  background: #44a549;
   color: #fff;
   border: none;
   padding: 12px 28px;
@@ -109,6 +182,40 @@
 
 .gm-hero-btn:hover {
   background: #43a047;
+}
+
+/* Dots container */
+.gm-hero-dots {
+  position: absolute;
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 12px;
+  z-index: 3;
+}
+
+/* Default dot */
+.gm-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 254, 254, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Active dot (premium style) */
+.gm-dot.active {
+  width: 28px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #4caf50, #1b5e20);
+  box-shadow: 0 0 10px rgba(76,175,80,0.7);
+}
+
+/* Hover effect */
+.gm-dot:hover {
+  background: #fff;
 }
 
 @media (max-width: 768px) {
