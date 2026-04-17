@@ -13,9 +13,21 @@ import almonds from "../../assets/ProductView/product-almonds.png";
 import "./TrendingProducts.css";
 
 import { products } from "../../data/products";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { fetchTrendingProducts } from "../../features/LandingPage/TrendingProductSlice";
 
 
 const TrendingProducts = () => {
+  const dispatch = useDispatch();
+  const { items, loading } = useSelector((state: any) => state.trendingProducts);
+const [visibleCount, setVisibleCount] = useState(5);
+
+  useEffect(() => {
+    dispatch(fetchTrendingProducts());
+  }, [dispatch]);
+
+  const visibleProducts = items.slice(0, visibleCount);
 
   const trendingProducts = products.filter(p => p.oldPrice).slice(0, 5);
 
@@ -27,9 +39,9 @@ const TrendingProducts = () => {
         <div className="tp-line"></div>
       </div>
 
-      <div className="tp-grid">
-        {trendingProducts.map((product, i) => (
-          <ProductCard key={i} product={product} />
+      <div className="tp-grid">{
+        visibleProducts.map((product: any) => (
+          <ProductCard key={product.id} product={product} />
         ))}
       </div>
 

@@ -1,0 +1,169 @@
+.order-card {
+  background: #fff;
+  border: 1px solid #eaeaea;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.order-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.order-title h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0 0 4px;
+}
+
+.order-title span {
+  font-size: 0.8rem;
+  color: #999;
+}
+
+.order-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-download {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.82rem;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.btn-download:hover {
+  background: #f5f5f5;
+}
+
+.btn-more {
+  padding: 6px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.btn-more:hover {
+  background: #f5f5f5;
+}
+
+.order-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+}
+
+.order-info-row {
+  display: flex;
+  gap: 24px;
+}
+
+.order-info-label {
+  color: #888;
+  min-width: 120px;
+}
+
+.order-info-value {
+  color: #333;
+}
+
+.status-on-the-way {
+  color: #53ce57;
+  font-weight: 600;
+}
+
+.status-shipped {
+  color: #e8a020;
+  font-weight: 600;
+}
+
+.order-products {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 32px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+@media (max-width: 768px) {
+  .order-card {
+    padding: 16px;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .order-header {
+    /* flex-direction: column; */
+    gap: 10px;
+  }
+
+  .order-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .order-title h3 {
+    font-size: 0.95rem;
+  }
+
+  .order-title span {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .order-info-row {
+    flex-direction: column;   /* ✅ stack label + value */
+    gap: 2px;
+  }
+
+  .order-info-label {
+    min-width: unset;
+    font-size: 0.75rem;
+  }
+
+  .order-info-value {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .order-products {
+    grid-template-columns: 1fr;   /* ✅ single column */
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .btn-download {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+  }
+
+  .btn-more {
+    padding: 5px;
+  }
+}
+
+

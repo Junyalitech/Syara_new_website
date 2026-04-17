@@ -272,6 +272,95 @@
   box-shadow:0 6px 14px rgba(0,0,0,0.08);
 }
 
+.package-select p{
+  font-size: 15px;
+  color: #333;
+}
+
+.pack-options {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.pack-options button {
+  padding: 8px 14px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  background: white;
+}
+
+.pack-options button.active {
+  /* background: #002f6c; */
+  color: #3e9e41;
+  border-color: #3e9e41;
+}
+
+/* Skeleton Base */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 25%,
+    #f5f5f5 50%,
+    #e0e0e0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+/* Different skeleton shapes */
+.skeleton.title {
+  height: 28px;
+  width: 60%;
+}
+
+.skeleton.meta {
+  height: 18px;
+  width: 40%;
+}
+
+.skeleton.price {
+  height: 24px;
+  width: 30%;
+}
+
+.skeleton.stock {
+  height: 16px;
+  width: 25%;
+}
+
+.skeleton.pack {
+  height: 50px;
+  width: 100%;
+}
+
+.skeleton.desc {
+  height: 60px;
+  width: 100%;
+}
+
+.skeleton.cart {
+  height: 50px;
+  width: 100%;
+}
+
+.skeleton.payment {
+  height: 40px;
+  width: 70%;
+}
+
+/* Animation */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
 @media(max-width:768px){
 
   .product-title{
@@ -326,4 +415,27 @@
     flex:1 1 auto;
     text-align:center;
   }
+}
+
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #fff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 6px;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cart-section button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
 }

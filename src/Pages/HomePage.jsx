@@ -17,9 +17,9 @@ const HomePage = () => {
       <TopProducts/>
       <PromoBanners/>
       <DealOfWeek/>
-      <DealOfDay/>
-      <ShopSection/>
-      <BottomThreeCards/>
+      {/* <DealOfDay/> */}
+      {/* <ShopSection/> */}
+      {/* <BottomThreeCards/> */}
     </div>
   )
 }

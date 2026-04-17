@@ -80,3 +80,69 @@
 .pt-table td:last-child{
   color:#777;
 }
+
+/* Tabs Skeleton */
+.pt-skeleton-tab {
+  width: 120px;
+  height: 36px;
+  border-radius: 8px;
+  margin-right: 10px;
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 25%,
+    #f5f5f5 50%,
+    #e0e0e0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+/* Text lines */
+.pt-skeleton-line {
+  height: 14px;
+  width: 100%;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 25%,
+    #f5f5f5 50%,
+    #e0e0e0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+.pt-skeleton-line.short {
+  width: 60%;
+}
+
+/* Table Skeleton */
+.pt-skeleton-table {
+  margin-top: 20px;
+}
+
+.pt-skeleton-row {
+  height: 20px;
+  width: 100%;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    #e0e0e0 25%,
+    #f5f5f5 50%,
+    #e0e0e0 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.2s infinite;
+}
+
+/* Animation */
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

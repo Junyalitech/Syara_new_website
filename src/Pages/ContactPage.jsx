@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import "./ContactPage.css";
+import { useNavigate } from 'react-router-dom';
+
+import toast from "react-hot-toast";
 
 function ContactUs() {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -10,55 +14,100 @@ function ContactUs() {
         message: ''
     });
 
+
+    const [loading, setLoading] = useState(false);
+
     const handleChange = (e) => {
         const { name, value } = e.target;
+
+        let updatedValue = value;
+
+        // Name validation (only letters + space)
+        if (name === "name") {
+            updatedValue = value.replace(/[^a-zA-Z\s]/g, "");
+        }
+
+        // Phone validation (only numbers, max 10 digits)
+        if (name === "phone") {
+            updatedValue = value.replace(/[^0-9]/g, "").slice(0, 10);
+        }
+
         setFormData({
             ...formData,
-            [name]: value
+            [name]: updatedValue,
         });
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
+        // Name validation
+        if (!/^[a-zA-Z\s]+$/.test(formData.name)) {
+            toast.error("❌ Name should contain only letters");
+            return;
+        }
+
+        // Phone validation (10 digits)
+        if (!/^[0-9]{10}$/.test(formData.phone)) {
+            toast.error("❌ Phone must be 10 digits");
+            return;
+        }
+
         try {
-            const response = await fetch('/api/contact-us', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            });
+            setLoading(true);
+
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/contact-us`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(formData),
+                }
+            );
+
+            const data = await response.json();
 
             if (response.ok) {
-                const data = await response.json();
-                console.log('Contact form submitted successfully:', data);
-                alert("Contact form submitted successfully");
-                // Optionally reset the form fields here
+                console.log("Success:", data);
+
+                toast.success("✅ Message sent successfully!");
+
                 setFormData({
-                    name: '',
-                    email: '',
-                    phone: '',
-                    subject: '',
-                    message: ''
+                    name: "",
+                    email: "",
+                    phone: "",
+                    subject: "",
+                    message: "",
                 });
-                // Handle success (e.g., show success message to user)
+
             } else {
-                const errorData = await response.json();
-                console.error('Contact form submission failed:', errorData);
-                // Handle error (e.g., show error message to user)
+                console.error("Error:", data);
+                toast.error(data.message || "❌ Something went wrong");
             }
+
         } catch (error) {
-            console.error('Error submitting contact form:', error);
-            // Handle network error or other exceptions
+            console.error("Network Error:", error);
+            toast.error("❌ Server not responding");
+        } finally {
+            setLoading(false);
         }
     };
+
+
 
     return (
         <div className="contact-us">
             <div className="contact-banner">
+                {/* <p className="about-hero__breadcrumb">
+                    <span onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>Home</span>
+                    <span className="about-hero__separator">/</span>
+                    <span>Contact Us</span>
+                </p> */}
                 <h1>Contact Us</h1>
-                <p>We’d love to hear from you. Let’s connect 🚀</p>
+
             </div>
 
             <div className="contactus-container">
@@ -86,53 +135,67 @@ function ContactUs() {
                         ></iframe>
                     </div>
                 </div>
-                <div className="contact-box" style={{ background: 'rgba(11, 141, 63, 0.6)' }}>
+                <div className="contact-box" >
                     <form className="contact-form" onSubmit={handleSubmit}>
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="name">Enter your name:</label>
+                        <div className="form-group">
+                            <div className="input-box">
                                 <input
                                     type="text"
                                     id="name"
                                     name="name"
                                     value={formData.name}
                                     onChange={handleChange}
+                                    // placeholder='Your Name'
+                                    required
                                 />
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="email">Enter your email:</label>
-                                <input
-                                    type="email"
-                                    id="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                />
+                                <label htmlFor="name">Your Name</label>
                             </div>
                         </div>
-                        <div className="form-row">
-                            <div className="form-group">
-                                <label htmlFor="phone">Enter your phone number:</label>
+
+                        <div className="form-group">
+                            <div className="input-box">
                                 <input
                                     type="text"
                                     id="phone"
+                                    maxLength={10}
                                     name="phone"
                                     value={formData.phone}
                                     onChange={handleChange}
+                                    required
                                 />
+                                <label htmlFor="phone">Your Phone Number</label>
                             </div>
-                            <div className="form-group">
-                                <label htmlFor="subject">Subject:</label>
+                        </div>
+
+                        <div className="form-group">
+                            <div className="input-box">
                                 <input
                                     type="text"
                                     id="subject"
                                     name="subject"
                                     value={formData.subject}
                                     onChange={handleChange}
+                                    required
                                 />
+                                <label htmlFor="subject">Subject</label>
                             </div>
                         </div>
-                        <div className="form-row">
+
+                        <div className="form-group">
+                            <div className="input-box">
+                                <textarea
+                                    id="message"
+                                    name="message"
+                                    rows="4"
+                                    value={formData.message}
+                                    onChange={handleChange}
+                                ></textarea>
+                                <label htmlFor="message">Message</label>
+                            </div>
+                        </div>
+
+
+                        {/* <div className="form-row">
                             <div className="form-group full-width">
                                 <label htmlFor="message">Enter your message:</label>
                                 <textarea
@@ -143,8 +206,10 @@ function ContactUs() {
                                     onChange={handleChange}
                                 ></textarea>
                             </div>
-                        </div>
-                        <button className='contact-button' type="submit">Submit</button>
+                        </div> */}
+                        <button className='contact-button' type="submit" disabled={loading}>
+                            {loading ? "Sending..." : "Submit"}
+                        </button>
                     </form>
                 </div>
             </div>

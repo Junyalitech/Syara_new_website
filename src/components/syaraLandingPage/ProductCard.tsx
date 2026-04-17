@@ -1,69 +1,142 @@
-import React from 'react';
-import type { Product } from '../../data/products';
-import { Heart, ShoppingCart } from "lucide-react";
-import './ProductCard.css';
-import { useNavigate } from 'react-router-dom';
-import { useCart } from "../../context/CartContext";
-interface ProductCardProps {
-  product: Product;
-}
+import React, { useState } from "react";
+import { ShoppingCart } from "lucide-react";
+import "./ProductCard.css";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToCart } = useCart();
-  const navigate = useNavigate()
-  const discount =
-    product.oldPrice
-      ? Math.round(((product.oldPrice - product.price) / product.oldPrice) * 100)
-      : null;
+import {
+  addItem,
+  createCartAPI,
+  fetchUserCart,
+  insertProductAPI,
+  setCartItems,
+} from "../../features/cart/cartSlice";
+import toast from "react-hot-toast";
+import { addToCart } from "../../features/cart/cartUtils";
 
-      
+const ProductCard = ({ product }) => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const [adding, setAdding] = useState(false);
+
+  const { items, cartId, loading } = useSelector(
+    (state) => state.cart
+  );
+
+  const [selectedPack, setSelectedPack] = useState("1kg");
 
   const productview = () => {
-    navigate('/product/aptamil');
+    navigate(`/product/${product.slug}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }
+  };
+
+  const price =
+    selectedPack === "1kg"
+      ? product.packeoption1kgrate || product.price
+      : product.packeoption500gmrate || product.price;
+
+
+  const useraddToCartHandler = () => {
+    const cartItem = {
+      productId: product.id,
+      quantity: 1,
+      package: selectedPack,
+      price,
+      productName: product.productName,
+      image: product.image1,
+      Pack1kgprice: product.packeoption1kgrate,
+      Pack500gprice: product.packeoption500gmrate,
+      stock: product.stock,
+      slug:product.slug
+    };
+
+    const res = addToCart(cartItem);
+
+
+    if (res.error) {
+      toast.error(res.error);
+      return;
+    }
+
+
+    window.dispatchEvent(new Event("cartUpdated"));
+
+    toast.success("Item added to cart 🛒");
+  };
 
   return (
     <div className="gm-product-card" onClick={productview}>
-
-      {discount && <span className="gm-discount-badge">-{discount}%</span>}
-
-      <button className="gm-wishlist-btn">
-        <Heart size={18} />
-      </button>
-
       <div className="gm-product-image-wrapper">
-        <img src={product.image} alt={product.name} className="gm-product-image" />
-      </div>
+        <img
+          src={`${import.meta.env.VITE_API_URL}/public/userImages/${product.image1}`}
+          alt={product.productName}
+          className="gm-product-image"
+        />
 
-      <div className="gm-product-rating">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <span key={star} className={`gm-star ${star <= product.rating ? '' : 'empty'}`}>★</span>
-        ))}
-      </div>
-
-      <div className="gm-product-name">{product.name}</div>
-
-      <div className="gm-product-prices">
-        <span className="gm-product-price">${product.price.toFixed(2)}</span>
-
-        {product.oldPrice && (
-          <span className="gm-product-old-price">
-            ${product.oldPrice.toFixed(2)}
-          </span>
+        {product.stock === 0 ? (
+          <span className="stock-badge out">Out of Stock</span>
+        ) : (
+          // <span className="stock-badge in">In Stock</span>
+          ''
         )}
       </div>
 
-      <button className="gm-add-cart-btn"
+      <div className="gm-product-name">{product.productName}</div>
+
+      <div className="gm-product-prices">
+        <span className="gm-product-old-price">₹{product.oldPrice}</span>
+        <span className="gm-product-price">₹{price}</span>
+      </div>
+
+      {/* PACK OPTIONS */}
+      <div
+        className="gm-pack-options"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <label className={selectedPack === "1kg" ? "active" : ""}>
+          <input
+            type="radio"
+
+            style={{ marginRight: 4 }}
+            checked={selectedPack === "1kg"}
+            onChange={() => setSelectedPack("1kg")}
+          />
+          1kg
+        </label>
+
+        <label className={selectedPack === "500gm" ? "active" : ""}>
+          <input
+            style={{ marginRight: 4 }}
+            type="radio"
+            checked={selectedPack === "500gm"}
+            onChange={() => setSelectedPack("500gm")}
+          />
+          500g
+        </label>
+      </div>
+
+      <button
+        className="gm-add-cart-btn"
+        disabled={loading || product.stock === 0}
         onClick={(e) => {
-          e.stopPropagation(); // prevent navigation
-          addToCart(product);
+          e.stopPropagation();
+          useraddToCartHandler();
         }}
       >
-        <ShoppingCart size={16} />
-        Add to Cart
+        {product.stock === 0 ? (
+          "Out of Stock"
+        ) : adding ? (
+          <>
+            <span className="spinner"></span>
+            Adding...
+          </>
+        ) : (
+          <>
+            <ShoppingCart size={16} />
+            Add to Cart
+          </>
+        )}
       </button>
-
     </div>
   );
 };

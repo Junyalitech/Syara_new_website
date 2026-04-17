@@ -17,6 +17,7 @@ const Hero: React.FC = () => {
   const { images, loading } = useSelector((state: any) => state.hero);
 
   const [current, setCurrent] = useState(0);
+  const currentSlide = images[current] || {};
 
   // Fetch images from backend
   useEffect(() => {
@@ -81,12 +82,16 @@ const Hero: React.FC = () => {
           </div>
 
           <div className="gm-hero-content">
-            <span className="gm-hero-badge">Save upto 30% off</span>
-            <h1>Buy Fresh Groceries & Organic Food.</h1>
+            {/* <span className="gm-hero-badge">Save upto 30% off</span> */}
+            <h1>
+              {currentSlide?.title || "Welcome to our store"}
+            </h1>
             <p>
-              Find a wide variety of fresh produce, organic food, and daily essentials delivered to your doorstep.
+              {currentSlide?.description || "Shop fresh products at best prices."}
             </p>
-            <button onClick={()=>viewAllProducts({ category: 'Products' })} className="gm-hero-btn">
+            <button onClick={() =>
+              viewAllProducts({ category: currentSlide?.button })
+            } className="gm-hero-btn">
               Shop Now <ArrowRight size={18} />
             </button>
           </div>

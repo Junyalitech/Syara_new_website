@@ -1,16 +1,100 @@
-# React + Vite
+# Syara
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern e-commerce storefront built with React, Vite, Tailwind CSS, and Redux Toolkit. Syara includes product browsing, category filtering, cart management, protected checkout, account settings, and policy pages.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Product listing by category
+- Product detail pages with image galleries
+- Cart context with add/remove item logic
+- Auth-protected checkout and account pages
+- Redux Toolkit slices for auth, cart, orders, payments, and product data
+- React Query support for API data fetching
+- Tailwind CSS and Radix UI components for responsive UI
+- Contact, privacy, returns, and terms pages
+- Toast notifications and custom tooltips
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 18
+- Vite
+- Tailwind CSS
+- Redux Toolkit
+- React Query
+- React Router DOM
+- Radix UI
+- Axios
+- Zod
+- React Hot Toast
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Requirements
+
+- Node.js 18+ (or compatible LTS)
+- npm
+
+### Install dependencies
+
+```bash
+npm install
+```
+
+### Environment
+
+Syara expects a backend API base URL in an environment variable.
+
+Create a `.env` file in the project root with:
+
+```env
+VITE_API_URL=https://your-api.example.com
+```
+
+### Run locally
+
+```bash
+npm run dev
+```
+
+Open the local URL shown in the terminal to view the app.
+
+### Build for production
+
+```bash
+npm run build
+```
+
+### Preview production build
+
+```bash
+npm run preview
+```
+
+## Project Structure
+
+- `src/` - main source files
+- `src/App.jsx` - application routes and layout
+- `src/main.jsx` - app entry point
+- `src/app/store.js` - Redux store configuration
+- `src/context/CartContext.jsx` - cart state provider
+- `src/components/` - reusable UI components
+- `src/features/` - Redux feature slices and async logic
+- `src/Pages/` - page-level views
+- `src/components/Policy/` - privacy, returns, and terms pages
+
+## Notes
+
+- The app uses `import.meta.env.VITE_API_URL` for API requests.
+- Protected routes redirect unauthenticated users to the home page.
+- Local storage stores tokens and user identifiers for session persistence.
+
+## Scripts
+
+- `npm run dev` - start development server
+- `npm run build` - build production assets
+- `npm run preview` - preview production build
+- `npm run lint` - run ESLint
+
+## License
+
+This repository is currently private and may be adapted for custom e-commerce frontend projects.

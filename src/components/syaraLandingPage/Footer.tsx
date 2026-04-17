@@ -4,9 +4,11 @@ import './Footer.css';
 import logo from '../../assets/Logo/logo.png';
 import { useDispatch, useSelector } from "react-redux";
 import { fetchContactInfo } from '../../features/LandingPage/ClientContactInfoSlice';
+import { log } from 'console';
+import { useNavigate } from 'react-router-dom';
 
 const Footer: React.FC = () => {
-
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { contact, loading } = useSelector((state: any) => state.footer);
 
@@ -22,6 +24,14 @@ const Footer: React.FC = () => {
   ];
 
   console.log('Footer contact info:', contact);
+
+  const loggedIn = localStorage.getItem('syara')
+
+  
+
+  const handleOrders = () => {
+    navigate("/account", { state: { activeNav: "orders" } });
+  };
 
   return (
     <>
@@ -52,22 +62,27 @@ const Footer: React.FC = () => {
           </div>
 
           <div className="gm-footer-col">
-            <h4>My Account</h4>
+            <h4>Quick Links</h4>
             <ul>
-              <li><a href="#">My Account</a></li>
-              <li><a href="#">Order History</a></li>
-              <li><a href="#">Shopping Cart</a></li>
-              <li><a href="#">Wishlist</a></li>
+              
+                <li><a href="/" >Home</a></li>
+                <li><a href="/about" >About Us</a></li>
+              {loggedIn && (<>
+                <li><a href="/account">My Account</a></li>
+                <li onClick={handleOrders}><a href="#">Order History</a></li>
+              </>
+              )}
+              
             </ul>
           </div>
 
           <div className="gm-footer-col">
             <h4>Information</h4>
             <ul>
-              <li><a href="#">About Us</a></li>
-              <li><a href="#">Privacy Policy</a></li>
-              <li><a href="#">Terms & Conditions</a></li>
-              <li><a href="#">Contact Us</a></li>
+              <li><a href="/privacypolicy">Privacy Policy</a></li>
+              <li><a href="/termsofservice">Terms & Conditions</a></li>
+              <li><a href="/returnpolicy">Return Policy</a></li>
+              <li><a href="/contact">Contact Us</a></li>
             </ul>
           </div>
 

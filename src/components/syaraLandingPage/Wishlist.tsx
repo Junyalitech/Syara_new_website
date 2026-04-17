@@ -26,8 +26,8 @@ const Wishlist = ({ open, onClose, items, onUpdateQuantity, onRemove }: Wishlist
   const proceed = () => {
     navigate('/checkout');
     onClose();
-     window.scrollTo({ top: 0, behavior: "smooth" });
-     
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
   }
 
   return (
@@ -44,7 +44,7 @@ const Wishlist = ({ open, onClose, items, onUpdateQuantity, onRemove }: Wishlist
         {/* Header */}
         <div className="cd-header">
           <h2>
-            Your Cart ({totalItems} {totalItems === 1 ? "item" : "items"})
+            Your Wishlist ({totalItems} {totalItems === 1 ? "item" : "items"})
           </h2>
           <button onClick={onClose} className="cd-close">
             <X size={20} />
@@ -54,7 +54,7 @@ const Wishlist = ({ open, onClose, items, onUpdateQuantity, onRemove }: Wishlist
         {/* Body */}
         <div className="cd-body">
           {items.length === 0 ? (
-            <p className="cd-empty">Your cart is empty</p>
+            <p className="cd-empty">Your wishlist is empty</p>
           ) : (
             items.map((item) => (
               <div key={item.id} className="cd-item">
@@ -65,17 +65,8 @@ const Wishlist = ({ open, onClose, items, onUpdateQuantity, onRemove }: Wishlist
                   <h3>{item.name}</h3>
                   <p className="cd-price">${item.price.toFixed(2)}</p>
 
-                  <div className="cd-qty">
-                    <button onClick={() => onUpdateQuantity(item.id, -1)}>
-                      <Minus size={14} />
-                    </button>
 
-                    <span>{item.quantity}</span>
 
-                    <button onClick={() => onUpdateQuantity(item.id, 1)}>
-                      <Plus size={14} />
-                    </button>
-                  </div>
                 </div>
 
                 <button onClick={() => onRemove(item.id)} className="cd-remove">

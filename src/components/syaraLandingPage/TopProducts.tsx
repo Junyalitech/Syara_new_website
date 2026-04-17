@@ -1,29 +1,39 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { products } from "../../data/products";
 import ProductCard from "./ProductCard";
 import "./TopProducts.css";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchTopProducts } from "../../features/LandingPage/TopProductSlice";
 
 const tabs = ["All", "Fruits", "Vegetables", "Fish", "Drinks", "Grocery"];
 
 const TopProducts: React.FC = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("All");
-  const [visibleCount, setVisibleCount] = useState(5); // 1 row products
+  const dispatch = useDispatch();
+  const { items, loading } = useSelector((state: any) => state.topProducts);
+  const [visibleCount, setVisibleCount] = useState(5);
+
+  useEffect(() => {
+    dispatch(fetchTopProducts());
+  }, [dispatch]);
+
+
 
   const filtered =
     activeTab === "All"
       ? products
       : products.filter((p) => p.category === activeTab.toLowerCase());
 
-  const visibleProducts = filtered.slice(0, visibleCount);
+  const visibleProducts = items.slice(0, visibleCount);
 
-  const productview = () => {
-    navigate('/product/aptamil')
-  }
+  const productview = (product: any) => {
+    navigate(`/product/${product.slug}`);
+  };
 
   const viewAllProducts = () => {
-    navigate(`/products/Products`);
+    navigate(`/products/TopProducts`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -34,7 +44,7 @@ const TopProducts: React.FC = () => {
         <div className="gm-title-line" />
       </div>
 
-      <div className="gm-tabs">
+      {/* <div className="gm-tabs">
         {tabs.map((tab) => (
           <button
             key={tab}
@@ -47,15 +57,21 @@ const TopProducts: React.FC = () => {
             {tab}
           </button>
         ))}
-      </div>
+      </div> */}
 
       <div className="gm-products-grid">
-        {visibleProducts.map((product) => (
-          <ProductCard onClick={productview} key={product.id} product={product} />
-        ))}
+        {loading ? (
+          // 🔥 Skeleton Loader
+          Array(5).fill(0).map((_, i) => (
+            <div key={i} className="product-skeleton"></div>
+          ))
+        ) :
+          (visibleProducts.map((product: any) => (
+            <ProductCard key={product.id} product={product} />
+          )))}
       </div>
 
-      {visibleCount < filtered.length && (
+      {items.length > visibleCount && (
         <div className="gm-view-more">
           <button onClick={() => viewAllProducts()}>
             View More

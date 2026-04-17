@@ -1,0 +1,85 @@
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%; /* Dark overlay */
+  background: rgba(0, 0, 0, 0.45);
+
+  /* 🔥 Background blur */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+  /* filter: blur(.5); */
+}
+
+.modal-box {
+  background: #fff;
+  width: 350px;
+  padding: 25px;
+  border-radius: 16px;
+  text-align: center;
+  animation: popup 0.3s ease;
+}
+
+@keyframes popup {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.success-icon {
+  width: 50px;
+  height: 50px;
+  background: #28c76f;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  margin: 0 auto 15px;
+}
+
+.order_succes_subtitle {
+  color: #777;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.details {
+  background: #f7f7f7;
+  border-radius: 10px;
+  padding: 15px;
+  text-align: left;
+  margin-bottom: 20px;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.success {
+  color: #266f29;
+  font-weight: bold;
+}
+
+.view-btn {
+  width: 100%;
+  padding: 12px;
+  background: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}

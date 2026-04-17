@@ -1,22 +1,50 @@
 import { useState } from "react";
 import "./ProductGallery.css";
+import { Heart } from "lucide-react";
 
 interface ProductGalleryProps {
   images: string[];
   name: string;
+  loading?: boolean;
 }
 
-const ProductGallery: React.FC<ProductGalleryProps> = ({ images, name }) => {
+const ProductGallery: React.FC<ProductGalleryProps> = ({ images, name, loading }) => {
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [liked, setLiked] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="pg-container">
+
+        <div className="pg-main">
+          <div className="pg-skeleton-main"></div>
+        </div>
+
+        <div className="pg-thumbnails">
+          {Array(4).fill(0).map((_, i) => (
+            <div key={i} className="pg-skeleton-thumb"></div>
+          ))}
+        </div>
+
+      </div>
+    );
+  }
 
   return (
     <div className="pg-container">
 
       <div className="pg-main">
 
-        <button className="pg-wishlist">
-          ❤
-        </button>
+        {/* <button
+          className={`pg-wishlist ${liked ? "active" : ""}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            setLiked(!liked);
+          }}
+        >
+          <Heart size={18} fill={liked ? "red" : "none"} color={liked ? "red" : "black"} />
+
+        </button> */}
 
         <button
           className="pg-arrow left"

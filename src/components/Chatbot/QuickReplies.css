@@ -1,0 +1,32 @@
+/* Container */
+.quick-replies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  margin-left: 36px; /* aligns with bot messages */
+}
+
+/* Button */
+.quick-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 999px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.05);
+  color: #4dce51;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover */
+.quick-btn:hover {
+  background: #4dce51;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transform: translateY(-1px);
+}

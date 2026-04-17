@@ -1,0 +1,181 @@
+.security-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.security-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.security-row-info {
+  flex: 1;
+}
+
+.security-label {
+  font-size: 0.78rem;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.security-value {
+  font-size: 0.92rem;
+  color: #222;
+  margin: 0;
+  font-weight: 500;
+}
+
+.security-status-off {
+  color: #cc7700;
+}
+
+.security-input {
+  padding: 9px 14px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  width: 100%;
+  max-width: 340px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.security-input:focus {
+  border-color: #53ce57;
+}
+
+.password-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.password-input-wrap {
+  position: relative;
+  max-width: 340px;
+}
+
+.password-input-wrap .security-input {
+  padding-right: 40px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  padding: 4px;
+}
+
+.security-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-top: 20px;
+}
+
+.saved-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: #53ce57;
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .security-row {
+    flex-direction: column;
+    /* ✅ stack */
+    gap: 12px;
+  }
+
+  .security-row-actions {
+    width: 100%;
+    padding-top: 0;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    /* ✅ buttons wrap */
+  }
+
+  .security-input {
+    width: 100%;
+    max-width: 100%;
+    /* ✅ remove restriction */
+  }
+
+  
+}
+
+@media (max-width: 768px) {
+  .security-row-actions button {
+    flex: 1;              /* ✅ equal width buttons */
+    min-width: 100px;
+  }
+
+  .password-fields {
+  width: 100%;
+}
+
+.password-input-wrap {
+  max-width: 100%;
+}
+}
+
+/* Skeleton Row */
+.skeleton-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Label */
+.skeleton-label {
+  width: 120px;
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.05) 25%,
+    rgba(0,0,0,0.15) 50%,
+    rgba(0,0,0,0.05) 75%
+  );
+  animation: shimmer 1.2s infinite;
+}
+
+/* Value */
+.skeleton-value {
+  width: 100%;
+  height: 16px;
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.05) 25%,
+    rgba(0,0,0,0.15) 50%,
+    rgba(0,0,0,0.05) 75%
+  );
+  animation: shimmer 1.2s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.error-text {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+}

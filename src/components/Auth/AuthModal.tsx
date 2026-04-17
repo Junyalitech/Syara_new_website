@@ -7,9 +7,12 @@ import { SignupForm } from "./SignupForm";
 interface AuthModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onLoginSuccess: () => void; // ✅ ADD THIS
+  onSignupSuccess: () => void; // ✅ ADD THIS
+
 }
 
-export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
+export const AuthModal = ({ open, onOpenChange, onLoginSuccess,  onSignupSuccess    }: AuthModalProps) => {
   const [mode, setMode] = useState<"login" | "signup">("login");
 
   if (!open) return null;
@@ -20,7 +23,7 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
       <div className="auth-modal" onClick={(e) => e.stopPropagation()}>
         
         {/* CLOSE BUTTON */}
-        <button className="auth-close" onClick={() => onOpenChange(false)}>
+        <button className="auth-close" onClick={() => {onOpenChange(false);setMode('login')}}>
           ✕
         </button>
 
@@ -34,9 +37,9 @@ export const AuthModal = ({ open, onOpenChange }: AuthModalProps) => {
 
           {/* FORM SWITCH */}
           {mode === "login" ? (
-            <LoginForm onSwitchToSignup={() => setMode("signup")} />
+            <LoginForm onSwitchToSignup={() => setMode("signup")}  onLoginSuccess={onLoginSuccess}/>
           ) : (
-            <SignupForm onSwitchToLogin={() => setMode("login")} />
+            <SignupForm onSwitchToLogin={() => setMode("login")}  onSignupSuccess={onSignupSuccess}/>
           )}
 
         </div>

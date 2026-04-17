@@ -1,0 +1,29 @@
+.product-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+}
+
+.product-image {
+  width: 72px;
+  height: 72px;
+  border-radius: 10px;
+  background: #f7f7f7;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.product-details h4 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 4px;
+}
+
+.product-details p {
+  font-size: 0.8rem;
+  color: #888;
+  margin: 0;
+  line-height: 1.5;
+}
