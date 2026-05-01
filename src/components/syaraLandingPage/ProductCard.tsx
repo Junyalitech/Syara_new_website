@@ -47,7 +47,8 @@ const ProductCard = ({ product }) => {
       Pack1kgprice: product.packeoption1kgrate,
       Pack500gprice: product.packeoption500gmrate,
       stock: product.stock,
-      slug:product.slug
+      slug:product.slug,
+      is_liquid: product.is_liquid,
     };
 
     const res = addToCart(cartItem);
@@ -84,7 +85,7 @@ const ProductCard = ({ product }) => {
       <div className="gm-product-name">{product.productName}</div>
 
       <div className="gm-product-prices">
-        <span className="gm-product-old-price">₹{product.oldPrice}</span>
+        {/* <span className="gm-product-old-price">₹{product.oldPrice}</span> */}
         <span className="gm-product-price">₹{price}</span>
       </div>
 
@@ -101,7 +102,7 @@ const ProductCard = ({ product }) => {
             checked={selectedPack === "1kg"}
             onChange={() => setSelectedPack("1kg")}
           />
-          1kg
+          {product.is_liquid ? "1l" : "1kg"} 
         </label>
 
         <label className={selectedPack === "500gm" ? "active" : ""}>
@@ -111,7 +112,7 @@ const ProductCard = ({ product }) => {
             checked={selectedPack === "500gm"}
             onChange={() => setSelectedPack("500gm")}
           />
-          500g
+          {product.is_liquid ? "500ml" : "500g"}
         </label>
       </div>
 

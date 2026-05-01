@@ -67,6 +67,7 @@ const Hero: React.FC = () => {
                 key={index}
                 src={`${import.meta.env.VITE_API_URL}/public/userImages/${img.image}`}
                 className="gm-hero-bg"
+                alt='hero-img'
               />
             ))}
           </div>

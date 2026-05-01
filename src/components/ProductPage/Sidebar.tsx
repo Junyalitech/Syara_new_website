@@ -53,128 +53,136 @@ const Sidebar = ({ filters, setFilters, isMobile = false }) => {
             Price
           </button>
 
-       
+
 
           {/* 🔥 POPUP */}
-      {activeFilter && ( 
-        <div className="filter-popup"   onClick={() => setActiveFilter(null)}>
-          <div className="popup-content" onClick={(e) => e.stopPropagation()} >
+          {activeFilter && (
+            <div className="filter-popup" onClick={() => setActiveFilter(null)}>
+              <div className="popup-content" onClick={(e) => e.stopPropagation()} >
 
-            <div className="popup-header">
-              <h3>{activeFilter === "category" ? "Category" : "Price"}</h3>
-              <button onClick={() => setActiveFilter(null)}>✕</button>
+                <div className="popup-header">
+                  <h3>{activeFilter === "category" ? "Category" : "Price"}</h3>
+                  <button onClick={() => setActiveFilter(null)}>✕</button>
+                </div>
+
+                {/* CATEGORY FILTER */}
+                {activeFilter === "category" && (
+                  <div className="popup-body">
+                    {loading
+                      ? Array(6).fill(0).map((_, i) => (
+                        <div key={i} className="skeleton-category">
+                          <div className="skeleton-radio"></div>
+                          <div className="skeleton-text"></div>
+                        </div>
+                      ))
+                      : items.map((cat) => (
+                        <label key={cat.id} className="filter-item">
+                          <input
+                            type="radio"
+                            name="category"
+                            checked={filters.category === cat.slug}
+                            onChange={() => {
+                              toggleCategory(cat.slug);
+                              setActiveFilter(null);
+                            }}
+                          />
+                          {cat.name}
+                        </label>
+                      ))}
+                  </div>
+                )}
+
+                {/* PRICE FILTER */}
+                {activeFilter === "price" && (
+                  <div className="popup-body">
+                    {priceRanges.map((p) => (
+                      <label key={p.value} className="filter-item">
+                        <input
+                          type="radio"
+                          name="price"
+                          checked={filters.price === p.value}
+                          onChange={() => {
+                            setPrice(p.value);
+                            setActiveFilter(null);
+                          }}
+                        />
+                        {p.label}
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+              </div>
             </div>
+          )}
 
-            {/* CATEGORY FILTER */}
-            {activeFilter === "category" && (
-              <div className="popup-body">
-                {items.map((cat) => (
-                  <label key={cat.id} className="filter-item">
-                    <input
-                      type="radio"
-                      name="category"
-                      checked={filters.category === cat.slug}
-                      onChange={() => {
-                        toggleCategory(cat.slug);
-                        setActiveFilter(null);
-                      }}
-                    />
-                    {cat.name}
-                  </label>
-                ))}
-              </div>
-            )}
-
-            {/* PRICE FILTER */}
-            {activeFilter === "price" && (
-              <div className="popup-body">
-                {priceRanges.map((p) => (
-                  <label key={p.value} className="filter-item">
-                    <input
-                      type="radio"
-                      name="price"
-                      checked={filters.price === p.value}
-                      onChange={() => {
-                        setPrice(p.value);
-                        setActiveFilter(null);
-                      }}
-                    />
-                    {p.label}
-                  </label>
-                ))}
-              </div>
-            )}
-
-          </div>
-        </div>
-      )}
-
-    </div >
+        </div >
       ) :
-<aside className={`sidebar ${open ? "open" : ""} ${isMobile ? "mobile" : ""}`}>
+        <aside className={`sidebar ${open ? "open" : ""} ${isMobile ? "mobile" : ""}`}>
 
 
-  {!isMobile && (
-    <div className="sidebar-header">
-      <h3>Filters</h3>
-    </div>
-  )}
+          {!isMobile && (
+            <div className="sidebar-header">
+              <h3>Filters</h3>
+            </div>
+          )}
 
-  <div className="filter-section">
-    {!isMobile && <h4>Category</h4>}
-    {loading
-      ? Array(5)
-        .fill(0)
-        .map((_, i) => (
-          <div key={i} className="skeleton-item"></div>
-        ))
-      :
-      items.map((cat) => (
-        <label
-          key={cat.id}
-          className={`filter-item ${filters.category === cat.slug ? "active" : ""
-            }`}
-        >
-          <input
-            type="radio" // ✅ change to radio (optional but better UX)
-            name="category"
-            checked={filters.category === cat.slug}
-            onChange={() => toggleCategory(cat.slug)}
-          />
-          {cat.name}
-        </label>
-      ))}
-  </div>
+          <div className="filter-section">
+            {!isMobile && <h4>Category</h4>}
+            {loading
+              ? Array(6).fill(0).map((_, i) => (
+                <div key={i} className="skeleton-category">
+                  <div className="skeleton-radio"></div>
+                  <div className="skeleton-text"></div>
+                </div>
+              ))
+              :
+              items.map((cat) => (
+                <label
+                  key={cat.id}
+                  className={`filter-item ${filters.category === cat.slug ? "active" : ""
+                    }`}
+                >
+                  <input
+                    type="radio" // ✅ change to radio (optional but better UX)
+                    name="category"
+                    checked={filters.category === cat.slug}
+                    onChange={() => toggleCategory(cat.slug)}
+                  />
+                  {cat.name}
+                </label>
+              ))}
+          </div>
 
-  {/* PRICE */}
-  <div className="filter-section">
-    {!isMobile && <h4>Price</h4>}
-    {priceRanges.map((p) => (
-      <label
-        key={p.value}
-        className={`filter-item ${filters.price === p.value ? "active" : ""
-          }`}
-      >
-        <input
-          type="radio"
-          name="price"
-          checked={filters.price === p.value}
-          onChange={() => setPrice(p.value)}
-        />
-        {p.label}
-      </label>
-    ))}
-  </div>
+          {/* PRICE */}
+          <div className="filter-section">
+            {!isMobile && <h4>Price</h4>}
+            {priceRanges.map((p) => (
+              <label
+                key={p.value}
+                className={`filter-item ${filters.price === p.value ? "active" : ""
+                  }`}
+              >
+                <input
+                  type="radio"
+                  name="price"
+                  checked={filters.price === p.value}
+                  onChange={() => setPrice(p.value)}
+                />
+                {p.label}
+              </label>
+            ))}
+          </div>
 
 
 
-</aside>
+        </aside>
       }
-{
-  !isMobile && open && (
-    <div className="overlay" onClick={() => setOpen(false)} />
-  )
-}
+      {
+        !isMobile && open && (
+          <div className="overlay" onClick={() => setOpen(false)} />
+        )
+      }
     </>
   );
 };

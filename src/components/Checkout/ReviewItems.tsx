@@ -186,7 +186,7 @@ const ReviewItems = () => {
                   </div>
 
                   <div className="item-details">
-                    <div className="item-name">{item.productName}  <span>({item.package} Pack)</span></div>
+                    <div className="item-name">{item.productName}  <span>({item.package === "1kg" ? item.is_liquid ? "1L" : "1Kg" : item.is_liquid ? "500ML" : "500G"})</span></div>
                     {/* <div className="item-package"></div> */}
                     <div className="item-right">
                       <div className="item-price">₹{displayPrice.toFixed(0)} × {item.quantity}</div>

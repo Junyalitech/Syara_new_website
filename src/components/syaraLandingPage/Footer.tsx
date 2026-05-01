@@ -25,7 +25,7 @@ const Footer: React.FC = () => {
 
   console.log('Footer contact info:', contact);
 
-  const loggedIn = localStorage.getItem('syara')
+  const loggedIn = localStorage.getItem('syaraid')
 
   
 

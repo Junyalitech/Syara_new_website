@@ -62,15 +62,7 @@ const ProductPage = () => {
                         <Sidebar filters={filters} setFilters={setFilters} />
                     </div>
 
-                    {loading ? (
-                        <div className="product-grid-skeleton">
-                            {Array(8).fill(0).map((_, i) => (
-                                <div key={i} className="product-skeleton"></div>
-                            ))}
-                        </div>
-                    ) : (
-                        <ProductGrid products={filteredProducts} loading={loading} />
-                    )}
+                    <ProductGrid products={filteredProducts} loading={loading} />
                 </div>
             </main>
         </div>

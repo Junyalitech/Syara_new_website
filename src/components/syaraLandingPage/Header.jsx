@@ -156,7 +156,7 @@ const Header = () => {
     };
   }, []);
 
-  localStorage.getItem("syara") === "true" && !isLoggedIn && setIsLoggedIn(true);
+  localStorage.getItem("syaraid") && !isLoggedIn && setIsLoggedIn(true);
 
   return (
     <>
@@ -196,7 +196,7 @@ const Header = () => {
                 value={query}
                 onChange={(e) => handleSearch(e.target.value)}
               />
-              <button><Search size={16} /></button>
+              <button className='headerSearchButton'><Search size={16} /></button>
 
               {(searchLoading || query) && (
                 <div className="gm-search-dropdown">

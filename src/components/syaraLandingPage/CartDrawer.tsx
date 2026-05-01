@@ -262,7 +262,7 @@ const CartDrawer = ({ open, onClose,
                   <div className="cd-item-info">
                     <h3>{normalizeItem(item).productName}</h3>
                     <p className="cd-package">
-                      {normalizeItem(item).package === "1kg" ? "1Kg Pack" : "500g Pack"}
+                      {normalizeItem(item).package === "1kg" ? item.is_liquid ? "1L Pack" : "1Kg Pack" : item.is_liquid ? "500ML Pack" : "500G Pack"}
                     </p>
 
                     {/* ✅ PRICE */}

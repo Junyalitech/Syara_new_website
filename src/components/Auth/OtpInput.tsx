@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import "./OtpInput.css";
 
-export const OtpInput = () => {
+export const OtpInput = ({ onChangeOtp }) => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -22,6 +22,11 @@ export const OtpInput = () => {
       inputRefs.current[index - 1]?.focus();
     }
   };
+
+  useEffect(() => {
+    const otpValue = otp.join("");
+    onChangeOtp(otpValue);
+  }, [otp]);
 
   return (
     <div className="otp-container">

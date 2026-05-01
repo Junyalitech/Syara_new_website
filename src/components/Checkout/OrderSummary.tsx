@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { fetchProfile } from "../../features/auth/profileSlice";
 
 const OrderSummary = ({ pincode, checkoutAddress }) => {
+  
   const [deliveryOptions, setDeliveryOptions] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [orderData, setOrderData] = useState(null);
@@ -15,9 +16,10 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
   const [paymentMethod, setPaymentMethod] = useState("online");
   const [deliveryMethod, setDeliveryMethod] = useState("porter");
   const [promoCode, setPromoCode] = useState("");
-  const dispatch = useDispatch();
+  const dispatch = useDispatch();   
   const { profile } = useSelector((state) => state.user);
   const [items, setItems] = useState([]);
+  
   // const { items } = useSelector((state: any) => state.cart);
   useEffect(() => {
     const loadCart = () => {
@@ -239,6 +241,7 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
 
   };
 
+  const hasLiquidProduct = items.some(item => item.is_liquid === true);
 
 
   return (
@@ -332,7 +335,7 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
             </label>
           )}
 
-          {deliveryOptions?.delivery_options?.courier_air?.available && (
+          {deliveryOptions?.delivery_options?.courier_air?.available && !hasLiquidProduct && (
             <label className={`delivery-card ${deliveryMethod === "air" ? "active" : ""}`}>
               <input
                 type="radio"

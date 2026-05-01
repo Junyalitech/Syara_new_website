@@ -53,7 +53,8 @@ const ProductInfo = ({ product, loading }: any) => {
       Pack1kgprice: product.packeoption1kgrate,
       Pack500gprice: product.packeoption500gmrate,
       stock: product.stock,
-      slug:product.slug
+      slug:product.slug,
+      is_liquid: product.is_liquid,
     };
 
     const res = addToCart(cartItem);
@@ -82,6 +83,8 @@ const ProductInfo = ({ product, loading }: any) => {
     );
   }
 
+  console.log("Product Info Rendered with product:", product);
+
   return (
     <div className="product-info">
       <div>
@@ -89,16 +92,16 @@ const ProductInfo = ({ product, loading }: any) => {
 
         <div className="product-meta">
           <span>
-            {product?.nickname1} / {product?.nickname2} /{" "}
-            {product?.nickname3}
+            {product?.nickname1}  {product?.nickname2 ?  `/ ${product?.nickname2}` :''  } {" "}
+            {product?.nickname3 ? `/ ${product?.nickname3}` :''  }
           </span>
 
-          <StarRating rating={4} />
+          {/* <StarRating rating={4} /> */}
         </div>
       </div>
 
       <div className="price-box">
-        <span className="old-price">₹{product?.oldPrice?.toFixed(2)}</span>
+        {/* <span className="old-price">₹{product?.oldPrice?.toFixed(2)}</span> */}
         <span className="new-price">
           ₹{price?.toFixed(2)}
         </span>
@@ -121,7 +124,7 @@ const ProductInfo = ({ product, loading }: any) => {
           >
             {/* {product?.packeoption1kg} */}
 
-            1kg - ₹
+          {product?.is_liquid ? "1l" : "1kg"} - ₹
             {product?.packeoption1kgrate}
           </button>
 
@@ -129,7 +132,7 @@ const ProductInfo = ({ product, loading }: any) => {
             className={selectedPack === "500gm" ? "active" : ""}
             onClick={() => setSelectedPack("500gm")}
           >
-            500g - ₹
+            {product?.is_liquid ? "500ml" : "500g"} - ₹
             {product?.packeoption500gmrate}
           </button>
         </div>

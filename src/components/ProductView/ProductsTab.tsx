@@ -19,32 +19,36 @@ const AdditionalInfo = ({ product }: any) => {
           <td>{product?.Category?.name || "General"}</td>
         </tr>
 
-        <tr>
-          <td>Nicknames</td>
-          <td>{nicknames || "N/A"}</td>
-        </tr>
+        {
+          nicknames && (
 
-        <tr>
-          <td>Recipe</td>
-          <td>
-            {product?.recipe ? (
+            <tr>
+              <td>Nicknames</td>
+              <td>{nicknames || "N/A"}</td>
+            </tr>)
+        }
+
+        {product?.recipe && (
+          <tr>
+            <td>Recipe</td>
+            <td>
               <a href={product.recipe} target="_blank">
                 View Recipe
               </a>
-            ) : "N/A"}
-          </td>
-        </tr>
+            </td>
+          </tr>
+        )}
 
-        <tr>
-          <td>Video</td>
-          <td>
-            {product?.video ? (
+        {product?.video && (
+          <tr>
+            <td>Video</td>
+            <td>
               <a href={product.video} target="_blank">
                 Watch Video
               </a>
-            ) : "N/A"}
-          </td>
-        </tr>
+            </td>
+          </tr>
+        )}
 
       </tbody>
     </table>
@@ -55,31 +59,31 @@ const ProductTabs = ({ product, loading }: any) => {
   const [activeTab, setActiveTab] = useState(0);
 
   if (loading) {
-  return (
-    <div className="pt-container">
+    return (
+      <div className="pt-container">
 
-      {/* Tabs Skeleton */}
-      <div className="pt-tabs">
-        <div className="pt-skeleton-tab"></div>
-        <div className="pt-skeleton-tab"></div>
-      </div>
-
-      {/* Content Skeleton */}
-      <div className="pt-content">
-        <div className="pt-skeleton-line"></div>
-        <div className="pt-skeleton-line"></div>
-        <div className="pt-skeleton-line short"></div>
-
-        <div className="pt-skeleton-table">
-          {Array(4).fill(0).map((_, i) => (
-            <div key={i} className="pt-skeleton-row"></div>
-          ))}
+        {/* Tabs Skeleton */}
+        <div className="pt-tabs">
+          <div className="pt-skeleton-tab"></div>
+          <div className="pt-skeleton-tab"></div>
         </div>
-      </div>
 
-    </div>
-  );
-}
+        {/* Content Skeleton */}
+        <div className="pt-content">
+          <div className="pt-skeleton-line"></div>
+          <div className="pt-skeleton-line"></div>
+          <div className="pt-skeleton-line short"></div>
+
+          <div className="pt-skeleton-table">
+            {Array(4).fill(0).map((_, i) => (
+              <div key={i} className="pt-skeleton-row"></div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    );
+  }
 
   return (
     <div className="pt-container">
@@ -100,7 +104,7 @@ const ProductTabs = ({ product, loading }: any) => {
         {activeTab === 0 && (
           <p>
             {product?.description || "No description available for this product."}
-             </p>
+          </p>
         )}
 
         {activeTab === 1 && <AdditionalInfo product={product} />}

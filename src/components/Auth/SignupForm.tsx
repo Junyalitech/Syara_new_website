@@ -14,6 +14,7 @@ interface SignupFormProps {
 export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps) => {
   const [step, setStep] = useState<1 | 2>(1);
   const [registerLoading, setRegisterLoading] = useState(false);
+  const [verifyButtonLoading, setVerifyButtonLoading] = useState(false);
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
   // ✅ form states
@@ -21,6 +22,7 @@ export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [errors, setErrors] = useState({
     name: "",
     email: "",
@@ -67,16 +69,55 @@ export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps
       const res = await dispatch(registerUser({ name, email, phone, password, role: 'customer' })).unwrap();
 
       console.log("Signup success:", res);
-      localStorage.setItem("syara", "true"); // ✅ simple auth flag
 
-      localStorage.setItem("syaraid", res.user?.id); // optional
+      setStep(2); // OTP step
 
+    } catch (err) {
+      console.error("Signup error:", err);
+    }
+    finally {
+      setRegisterLoading(false);
+    }
+  };
+
+  // ================= OTP VERIFY =================
+  const handleVerify = async () => {
+    try {
+      // 👉 Call verify OTP API
+      setVerifyButtonLoading(true);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/verify-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          phone: phone, // make sure this variable exists
+          otp: otp,     // make sure this variable exists
+        }),
+      });
+
+      const res = await response.json();
+
+      if (!response.ok) {
+        console.error("OTP verification failed:", res.message);
+        setVerifyButtonLoading(false)
+        return;
+      }
+
+      console.log("Signup success", res);
+
+      // ✅ Store auth flag
+      localStorage.setItem("syara", "true");
+
+      // ✅ Store user ID
       const userId = res.user?.id;
+      localStorage.setItem("syaraid", userId);
 
+      // 🔥 Fetch user cart
       let serverCart = await fetchUserCartAPI(userId);
-
       console.log("Fetched server cart:", serverCart);
 
+      // 🔥 If no cart → create new cart
       if (!serverCart || serverCart.length === 0) {
         console.log("No cart found → creating new cart");
 
@@ -101,10 +142,10 @@ export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps
 
         console.log("New Cart Created:", newCart);
 
-        serverCart = []; // replace for next steps
+        serverCart = [];
       }
 
-      // 🔥 Step 3: Replace local cart
+      // 🔥 Replace local cart
       const updatedCart = replaceCart(serverCart);
 
       window.dispatchEvent(new Event("cartUpdated"));
@@ -112,23 +153,13 @@ export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps
       console.log("Cart after replacement:", updatedCart);
 
       onSignupSuccess();
-      // setStep(2); // OTP step
 
-    } catch (err) {
-      console.error("Signup error:", err);
+    } catch (error) {
+      console.error("Error verifying OTP:", error);
     }
     finally{
-      setRegisterLoading(false);
+      setVerifyButtonLoading(false);
     }
-  };
-
-  // ================= OTP VERIFY =================
-  const handleVerify = () => {
-    // 👉 validate OTP if needed
-
-    console.log("Signup success");
-    localStorage.setItem("syara", "true"); // ✅ simple auth flag
-    onSignupSuccess(); // ✅ same logic as login
   };
 
 
@@ -212,7 +243,7 @@ export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps
     <div className="signup-container">
       <div className="signup-header">
         <h2>Verify OTP</h2>
-        <p>Enter the verification code sent to your email.</p>
+        <p>Enter the verification code sent to your phone.</p>
       </div>
 
       <div className="step-indicator">
@@ -221,15 +252,19 @@ export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps
       </div>
 
       <div className="otp-section">
-        <OtpInput />
+        <OtpInput onChangeOtp={setOtp} />
 
-        <button className="primary-btn" onClick={handleVerify}>
-          Verify & Create Account
+        <button
+          className="primary-btn"
+          onClick={handleVerify}
+          disabled={otp.length !== 6 || verifyButtonLoading}
+        >
+          {verifyButtonLoading ? "Verifying..." : "Verify & Create Account"}
         </button>
 
-        <button className="secondary-btn">
+        {/* <button className="secondary-btn">
           Resend code
-        </button>
+        </button> */}
       </div>
 
       <button className="back-btn" >
