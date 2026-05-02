@@ -17,7 +17,7 @@ export const LoginForm = ({ onSwitchToSignup, onLoginSuccess }: LoginFormProps) 
   const [loginMethod, setLoginMethod] = useState<"password" | "otp" | null>(null);
   const [otpSent, setOtpSent] = useState(false);
   const [loginloading, setLoginloading] = useState(false);
-  const [verifyButtonLoading,setVerifyButtonLoading] = useState(false);
+  const [verifyButtonLoading, setVerifyButtonLoading] = useState(false);
   const dispatch = useDispatch();
   const { loading, error } = useSelector((state) => state.auth);
   // ✅ form states
@@ -35,6 +35,31 @@ export const LoginForm = ({ onSwitchToSignup, onLoginSuccess }: LoginFormProps) 
   const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
   const [sendotpLoading, setSendOtpLoading] = useState(false);
 
+
+  const handleApiError = (error, fallbackMessage = "Something went wrong") => {
+    console.error("API Error:", error);
+
+    // Axios / Redux Toolkit unwrap error
+    if (error?.message) {
+      toast.error(error.message);
+      return;
+    }
+
+    // Fetch API error response
+    if (error?.response?.data?.message) {
+      toast.error(error.response.data.message);
+      return;
+    }
+
+    // Network error
+    if (error?.name === "TypeError") {
+      toast.error("Network error. Please check your internet connection.");
+      return;
+    }
+
+    // Default fallback
+    toast.error(fallbackMessage);
+  };
   // ================= PASSWORD LOGIN =================
   const handlePasswordLogin = async () => {
     let newErrors = {
@@ -102,7 +127,7 @@ export const LoginForm = ({ onSwitchToSignup, onLoginSuccess }: LoginFormProps) 
       onLoginSuccess();
 
     } catch (err) {
-      console.error("Login error:", err);
+      handleApiError(err, "Login failed. Please try again.");
     }
     finally {
       setLoginloading(false);
@@ -155,7 +180,8 @@ export const LoginForm = ({ onSwitchToSignup, onLoginSuccess }: LoginFormProps) 
 
     } catch (error) {
       console.error("Error sending OTP:", error);
-      toast.error("Something went wrong");
+      handleApiError(error, "Unable to send OTP");
+      // toast.error("Something went wrong");
     } finally {
       setSendOtpLoading(false);
     }
@@ -215,10 +241,28 @@ export const LoginForm = ({ onSwitchToSignup, onLoginSuccess }: LoginFormProps) 
 
     } catch (error) {
       console.error("Error verifying OTP:", error);
+      handleApiError(error, "OTP verification failed");
     }
-    finally{
+    finally {
       setVerifyButtonLoading(false)
     }
+  };
+
+  const resetLoginState = () => {
+    setPhone("");
+    setPassword("");
+    setOtp("");
+    setOtpSent(false);
+
+    setErrors({
+      email: "",
+      phone: "",
+      password: "",
+    });
+
+    setLoginloading(false);
+    setSendOtpLoading(false);
+    setVerifyButtonLoading(false);
   };
 
   if (loginMethod === null) {
@@ -345,8 +389,8 @@ export const LoginForm = ({ onSwitchToSignup, onLoginSuccess }: LoginFormProps) 
           </div>
 
           <button className="primary-btn" disabled={sendotpLoading} onClick={handleSendOtp}>
-             {loading ? "Sending OTP..." : "Send OTP"}
-          </button>           
+            {loading ? "Sending OTP..." : "Send OTP"}
+          </button>
         </>
       ) : (
         <div className="otp-section">
