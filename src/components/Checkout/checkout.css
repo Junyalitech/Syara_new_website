@@ -733,7 +733,9 @@
   height: 60px;
   border-radius: 10px;
   background: #f3f4f6;
-  padding: 6px;
+  overflow: hidden;
+  /* padding: 6px; */
+  object-fit: contain;
 }
 
 .item-image img {

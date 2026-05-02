@@ -69,6 +69,7 @@ const ProductCard = ({ product }) => {
     <div className="gm-product-card" onClick={productview}>
       <div className="gm-product-image-wrapper">
         <img
+          style={{objectFit:'cover'}}
           src={`${import.meta.env.VITE_API_URL}/public/userImages/${product.image1}`}
           alt={product.productName}
           className="gm-product-image"

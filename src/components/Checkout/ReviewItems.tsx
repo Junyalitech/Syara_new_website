@@ -180,6 +180,7 @@ const ReviewItems = () => {
                 <div className="item-left">
                   <div className="item-image">
                     <img
+                      style={{objectFit:'cover'}}
                       src={`${import.meta.env.VITE_API_URL}/public/userImages/${item.image}`}
                       alt={item.productName}
                     />
