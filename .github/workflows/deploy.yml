@@ -17,10 +17,39 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            cd ~/Syara_new_website
+            echo "🚀 START FRONTEND DEPLOY"
+
+            # 🔥 Load NVM (IMPORTANT FIX)
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+            node -v
+            npm -v
+
+            cd ~/Syara_new_website || exit 1
+
+            echo "📥 Pull latest code"
             git pull origin main
+
+            echo "📦 Install dependencies"
             npm install
+
+            echo "🏗️ Building project"
             npm run build
+
+            echo "📁 Checking dist folder"
+            ls -la dist
+
+            echo "🧹 Clearing old files"
             rm -rf /var/www/html/*
+
+            echo "📤 Copy new build"
             cp -r dist/* /var/www/html/
+
+            echo "📁 Final files"
+            ls -la /var/www/html
+
+            echo "🔄 Restart nginx"
             systemctl restart nginx
+
+            echo "✅ FRONTEND DEPLOY DONE"
