@@ -76,6 +76,7 @@ const Categories: React.FC = () => {
             >
               <div className="gm-category-icon">
                 <img
+                style={{objectFit:"cover"}}
                   src={`${import.meta.env.VITE_API_URL}/public/userImages/${cat.image}`}
                   alt={cat.name}
                 />

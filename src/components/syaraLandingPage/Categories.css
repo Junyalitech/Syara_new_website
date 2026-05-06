@@ -97,6 +97,7 @@
   justify-content: center;
   font-size: 36px;
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .gm-category-item:hover .gm-category-icon {
@@ -107,9 +108,9 @@
 }
 
 .gm-category-icon img {
-  width: 70%;
-  height: 70%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .gm-category-name {
