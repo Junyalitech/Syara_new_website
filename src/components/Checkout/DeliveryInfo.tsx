@@ -7,6 +7,7 @@ import { fetchAddresses } from '../../features/auth/address';
 const DeliveryInfo = ({ setPincode, setCheckoutAddress }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState({
+    fullName: "",
     phone: "",
     address: "",
   });
@@ -23,14 +24,16 @@ const DeliveryInfo = ({ setPincode, setCheckoutAddress }) => {
     if (addresses.length > 0) {
       const addr = addresses[0];
 
+      // console.log("Setting default address:", addr);
       setSelectedAddress({
+        fullName : addr.fullName,
         phone: addr.phone,
-        address: `${addr.addressLine}, ${addr.city}, ${addr.state}, ${addr.pincode}`,
+        address: `${addr.addressLine}, ${addr.city}, ${addr.state} - ${addr.pincode}`
       });
 
       // 🔥 send pincode to parent
       setPincode(addr.pincode);
-      setCheckoutAddress(selectedAddress.address)
+      setCheckoutAddress(selectedAddress.fullName + ',' + selectedAddress.address + ',' + selectedAddress.phone);
     }
   }, [addresses]);
 
@@ -97,7 +100,7 @@ const DeliveryInfo = ({ setPincode, setCheckoutAddress }) => {
                 <div className="delivery-label">Delivery to</div>
 
                 <div className="delivery-value">
-                  Phone: {selectedAddress.phone}
+                  {selectedAddress.fullName} | {selectedAddress.phone}
                 </div>
 
                 <div className="delivery-label" style={{ marginTop: 4 }}>
@@ -115,8 +118,9 @@ const DeliveryInfo = ({ setPincode, setCheckoutAddress }) => {
         onClose={onClose}   // ✅ FIXED
         onSelect={(addr) => {
           setSelectedAddress({
+            fullName: addr.fullName,
             phone: addr.phone,
-            address: `${addr.addressLine}, ${addr.city}, ${addr.state}`,
+            address: `${addr.addressLine}, ${addr.city}, ${addr.state} - ${addr.pincode}`,
           });
 
           setPincode(addr.pincode);

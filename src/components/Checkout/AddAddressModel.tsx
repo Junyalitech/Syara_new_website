@@ -175,6 +175,16 @@ export const AddAddressModal = ({ isOpen, onClose, onSave }: Props) => {
       .then(() => {
         dispatch(fetchAddresses());
 
+        // ✅ SEND NEW ADDRESS TO PARENT
+        onSave({
+          fullName: form.fullName,
+          phone: form.phone,
+          addressLine: form.addressLine,
+          landmark: form.landmark,
+          city: form.city,
+          state: form.state,
+          pincode: form.pincode,
+        });
         // ✅ reset only after success
         setForm({
           fullName: "",

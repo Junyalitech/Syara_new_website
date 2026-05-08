@@ -49,7 +49,7 @@ export const AddressModal = ({ isOpen, onClose, onSelect }: Props) => {
         }
     }, [addresses]);
 
-    
+
     if (!isOpen) return null;
 
     return (
@@ -116,8 +116,13 @@ export const AddressModal = ({ isOpen, onClose, onSelect }: Props) => {
                 isOpen={showAddForm}
                 onClose={() => setShowAddForm(false)}
                 onSave={(newAddress) => {
-                    console.log("New Address:", newAddress);
-                    // 👉 later push into state / API
+
+                    // ✅ parent ko selected address bhejo
+                    onSelect(newAddress);
+
+                    // optional auto close
+                    setShowAddForm(false);
+                    onClose();
                 }}
             />
 

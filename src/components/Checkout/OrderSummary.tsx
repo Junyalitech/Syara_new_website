@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { fetchProfile } from "../../features/auth/profileSlice";
 
 const OrderSummary = ({ pincode, checkoutAddress }) => {
-  
+
   const [deliveryOptions, setDeliveryOptions] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [orderData, setOrderData] = useState(null);
@@ -16,10 +16,10 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
   const [paymentMethod, setPaymentMethod] = useState("online");
   const [deliveryMethod, setDeliveryMethod] = useState("porter");
   const [promoCode, setPromoCode] = useState("");
-  const dispatch = useDispatch();   
+  const dispatch = useDispatch();
   const { profile } = useSelector((state) => state.user);
   const [items, setItems] = useState([]);
-  
+
   // const { items } = useSelector((state: any) => state.cart);
   useEffect(() => {
     const loadCart = () => {
@@ -123,7 +123,7 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
 
   console.log("user", profile);
 
-  console.log("orderssummary",items)
+  console.log("orderssummary", items)
 
   const handlePlaceOrder = async () => {
     try {
