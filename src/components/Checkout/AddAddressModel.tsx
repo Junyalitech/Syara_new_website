@@ -126,6 +126,7 @@ export const AddAddressModal = ({ isOpen, onClose, onSave }: Props) => {
     }
 
     try {
+
       setPincodeStatus({ verified: false, loading: true, message: "" });
 
       const res = await fetch(`${import.meta.env.VITE_API_URL}/verify-pincode`, {
@@ -138,15 +139,25 @@ export const AddAddressModal = ({ isOpen, onClose, onSave }: Props) => {
 
       const data = await res.json();
 
-      if (data.valid) {
-        setPincodeStatus({
-          verified: true,
-          loading: false,
-          message: "✅ Delivery available",
-        });
+      // if (data.valid) {
+      //   setPincodeStatus({
+      //     verified: true,
+      //     loading: false,
+      //     message: "✅ Delivery available",
+      //   });
 
-        toast.success("Pincode verified successfully");
-      } else {
+      //   toast.success("Pincode verified successfully");
+      // } else {
+      //   setPincodeStatus({
+      //     verified: false,
+      //     loading: false,
+      //     message: "❌ Not serviceable",
+      //   });
+
+      //   toast.error(data.message || "Pincode not serviceable");
+      // }
+
+      if (!data.valid) {
         setPincodeStatus({
           verified: false,
           loading: false,
@@ -154,7 +165,44 @@ export const AddAddressModal = ({ isOpen, onClose, onSave }: Props) => {
         });
 
         toast.error(data.message || "Pincode not serviceable");
+        return;
       }
+
+      // ✅ FETCH PINCODE DETAILS
+      const postalRes = await fetch(
+        `https://api.postalpincode.in/pincode/${form.pincode}`
+      );
+
+      const postalData = await postalRes.json();
+
+      console.log("Postal API Response:", postalData);
+
+      if (
+        postalData &&
+        postalData[0]?.Status === "Success" &&
+        postalData[0]?.PostOffice?.length > 0
+      ) {
+        const office = postalData[0].PostOffice[0];
+
+        const district = office.District || "";
+        const state = office.State || "";
+        const country = office.Country || "India";
+
+        setForm((prev) => ({
+          ...prev,
+          city: district,
+          state: `${state}, ${country}`,
+        }));
+      }
+
+      setPincodeStatus({
+        verified: true,
+        loading: false,
+        message: "✅ Delivery available",
+      });
+
+      toast.success("Pincode verified successfully");
+
     } catch (err) {
       console.error(err);
       setPincodeStatus({
@@ -205,6 +253,40 @@ export const AddAddressModal = ({ isOpen, onClose, onSave }: Props) => {
       });
   };
 
+  const close = () => {
+    setForm({
+      fullName: "",
+      phone: "",
+      pincode: "",
+      city: "",
+      state: "",
+      addressLine: "",
+      landmark: "",
+      addressType: "Home",
+    })
+
+    setErrors(
+      {
+        fullName: "",
+        phone: "",
+        pincode: "",
+        city: "",
+        state: "",
+        addressLine: "",
+      }
+    )
+
+    setPincodeStatus(
+      {
+        verified: false,
+        loading: false,
+        message: "",
+      }
+    )
+
+    onClose();
+  }
+
   return (
     <div className="ck-modal-overlay">
       <div className="ck-modal large">
@@ -212,7 +294,7 @@ export const AddAddressModal = ({ isOpen, onClose, onSave }: Props) => {
         {/* Header */}
         <div className="ck-modal-header">
           <h3>Add New Address</h3>
-          <button style={{ cursor: 'pointer' }} onClick={onClose}>✖</button>
+          <button style={{ cursor: 'pointer' }} onClick={close}>✖</button>
         </div>
 
         {/* Form */}
@@ -303,9 +385,14 @@ export const AddAddressModal = ({ isOpen, onClose, onSave }: Props) => {
 
           <input
             name="city"
-            placeholder="City *"
+            placeholder="District *"
             value={form.city}
             onChange={handleChange}
+            readOnly={pincodeStatus.verified}
+            style={{
+              background: pincodeStatus.verified ? "#f5f5f5" : "#fff",
+              cursor: pincodeStatus.verified ? "not-allowed" : "text",
+            }}
           />
           {errors.city && <p className="error">{errors.city}</p>}
 
@@ -315,13 +402,18 @@ export const AddAddressModal = ({ isOpen, onClose, onSave }: Props) => {
             placeholder="State *"
             value={form.state}
             onChange={handleChange}
+            readOnly={pincodeStatus.verified}
+            style={{
+              background: pincodeStatus.verified ? "#f5f5f5" : "#fff",
+              cursor: pincodeStatus.verified ? "not-allowed" : "text",
+            }}
           />
           {errors.state && <p className="error">{errors.state}</p>}
 
           <textarea
             name="addressLine"
             value={form.addressLine}
-            placeholder="Full Address (House no, Area, Street) *"
+            placeholder="Full Address (House no, Area, Street, City) *"
             onChange={handleChange}
           />
           {errors.addressLine && <p className="error">{errors.addressLine}</p>}
