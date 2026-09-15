@@ -37,18 +37,45 @@ export const saveCart = (cart) => {
 export const addToCart = (item) => {
   let cart = getCart();
 
-  const exists = cart.find(
-    (i) => i.productId === item.productId && i.package === item.package
+  const existingIndex = cart.findIndex(
+    (i) =>
+      Number(i.productId) === Number(item.productId) &&
+      i.package === item.package
   );
 
-  if (exists) {
-    return { error: "Product already in cart" };
+  if (existingIndex !== -1) {
+    const existingItem = cart[existingIndex];
+
+    // Same product + same package + same quantity
+    if (Number(existingItem.quantity) === Number(item.quantity)) {
+      return { error: "Product already in cart" };
+    }
+
+    // Same product + same package but different quantity
+    cart[existingIndex] = {
+      ...existingItem,
+      quantity: item.quantity,
+      price: item.price,
+    };
+
+    saveCart(cart);
+
+    return {
+      success: true,
+      updated: true,
+      cart,
+    };
   }
 
+  // New product/package
   cart.push(item);
   saveCart(cart);
 
-  return { success: true, cart };
+  return {
+    success: true,
+    updated: false,
+    cart,
+  };
 };
 
 export const updateCartQty = (productId, packageType, quantity) => {

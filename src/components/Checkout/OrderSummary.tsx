@@ -154,7 +154,7 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
           deliveryTime: deliveryOptions?.delivery_options?.[deliveryMethod]?.time || "N/A",
           subtotal: subtotal,
           address: checkoutAddress       // NOT total
-        })
+        })  
       });
 
       const data = await res.json();

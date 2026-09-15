@@ -53,10 +53,40 @@ const ProductInfo = ({ product, loading }: any) => {
       Pack1kgprice: product.packeoption1kgrate,
       Pack500gprice: product.packeoption500gmrate,
       stock: product.stock,
-      slug:product.slug,
+      slug: product.slug,
       is_liquid: product.is_liquid,
     };
 
+    // Check if product already exists in cart
+    const existingItem = items?.find(
+      (item: any) => item.productId === product.id
+    );
+
+    if (existingItem) {
+      // Product already exists → replace quantity
+      const updatedItems = items.map((item: any) =>
+        item.productId === product.id
+          ? {
+            ...item,
+            quantity: quantity,
+            package: selectedPack,
+            price,
+          }
+          : item
+      );
+
+      dispatch(setCartItems(updatedItems));
+
+      // Keep localStorage/cart utility in sync if your cart uses localStorage
+      localStorage.setItem("cartItems", JSON.stringify(updatedItems));
+
+      window.dispatchEvent(new Event("cartUpdated"));
+
+      toast.success("Cart quantity updated 🛒");
+      return;
+    }
+
+    // Product doesn't exist → add normally
     const res = addToCart(cartItem);
 
     if (res.error) {
@@ -65,7 +95,11 @@ const ProductInfo = ({ product, loading }: any) => {
     }
 
     window.dispatchEvent(new Event("cartUpdated"));
-    toast.success("Item added to cart 🛒");
+    if (res.updated) {
+      toast.success("Cart quantity updated 🛒");
+    } else {
+      toast.success("Item added to cart 🛒");
+    }
   };
 
   if (loading) {
@@ -92,8 +126,8 @@ const ProductInfo = ({ product, loading }: any) => {
 
         <div className="product-meta">
           <span>
-            {product?.nickname1}  {product?.nickname2 ?  `/ ${product?.nickname2}` :''  } {" "}
-            {product?.nickname3 ? `/ ${product?.nickname3}` :''  }
+            {product?.nickname1}  {product?.nickname2 ? `/ ${product?.nickname2}` : ''} {" "}
+            {product?.nickname3 ? `/ ${product?.nickname3}` : ''}
           </span>
 
           {/* <StarRating rating={4} /> */}
@@ -124,7 +158,7 @@ const ProductInfo = ({ product, loading }: any) => {
           >
             {/* {product?.packeoption1kg} */}
 
-          {product?.is_liquid ? "1l" : "1kg"} - ₹
+            {product?.is_liquid ? "1l" : "1kg"} - ₹
             {product?.packeoption1kgrate}
           </button>
 
@@ -158,7 +192,7 @@ const ProductInfo = ({ product, loading }: any) => {
 
           <button
             onClick={() => {
-              if (quantity < product?.stock ) {
+              if (quantity < product?.stock) {
                 setQuantity(quantity + 1);
               }
             }}
@@ -176,7 +210,7 @@ const ProductInfo = ({ product, loading }: any) => {
             useraddToCartHandler();
           }}
         >
-          {product?.stock  === 0 ? (
+          {product?.stock === 0 ? (
             "Out of Stock"
           ) : adding ? (
             <>
