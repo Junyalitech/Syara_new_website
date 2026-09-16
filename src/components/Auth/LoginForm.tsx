@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./LoginForm.css";
 import { KeyRound, Smartphone } from "lucide-react";
 import { OtpInput } from "./OtpInput";
@@ -34,6 +34,18 @@ export const LoginForm = ({ onSwitchToSignup, onLoginSuccess }: LoginFormProps) 
   const validatePhone = (phone: string) => /^[6-9]\d{9}$/.test(phone);
   const validateEmail = (email: string) => /\S+@\S+\.\S+/.test(email);
   const [sendotpLoading, setSendOtpLoading] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
+
+  // Start/continue the 30-second resend countdown.
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+
+    const timer = window.setInterval(() => {
+      setResendCountdown((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [resendCountdown]);
 
 
   const handleApiError = (error, fallbackMessage = "Something went wrong") => {
@@ -175,13 +187,54 @@ export const LoginForm = ({ onSwitchToSignup, onLoginSuccess }: LoginFormProps) 
 
       console.log("OTP sent:", data);
 
-      // ✅ Move to OTP screen
+      // ✅ Move to OTP screen and start the 30-second resend cooldown
       setOtpSent(true);
+      setResendCountdown(30);
 
     } catch (error) {
       console.error("Error sending OTP:", error);
       handleApiError(error, "Unable to send OTP");
       // toast.error("Something went wrong");
+    } finally {
+      setSendOtpLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    // Prevent accidental/double resend requests while the cooldown is active.
+    if (resendCountdown > 0 || sendotpLoading || !validatePhone(phone)) return;
+
+    try {
+      setSendOtpLoading(true);
+
+      // Use the same login OTP API/template as the initial OTP.
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/login-send-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Resend OTP failed:", data.message);
+        toast.error(data.message || "Failed to resend OTP");
+        return;
+      }
+
+      console.log("OTP resent:", data);
+      toast.success("OTP resent successfully");
+
+      // Restart the 30-second cooldown after a successful resend.
+      setResendCountdown(30);
+
+      // Clear the old OTP so the user enters the newly sent OTP.
+      setOtp("");
+    } catch (error) {
+      console.error("Error resending OTP:", error);
+      handleApiError(error, "Unable to resend OTP");
     } finally {
       setSendOtpLoading(false);
     }
@@ -253,6 +306,7 @@ export const LoginForm = ({ onSwitchToSignup, onLoginSuccess }: LoginFormProps) 
     setPassword("");
     setOtp("");
     setOtpSent(false);
+    setResendCountdown(0);
 
     setErrors({
       email: "",
@@ -398,14 +452,27 @@ export const LoginForm = ({ onSwitchToSignup, onLoginSuccess }: LoginFormProps) 
           <button className="primary-btn" onClick={handleVerifyOtp} disabled={otp.length !== 6 || verifyButtonLoading}>
             {verifyButtonLoading ? "Verifying..." : "Verify & Sign in"}
           </button>
-          {/* <button className="secondary-btn" onClick={() => setOtpSent(false)}>
-            Resend code
-          </button> */}
+          <button
+            type="button"
+            className="secondary-btn"
+            onClick={handleResendOtp}
+            disabled={resendCountdown > 0 || sendotpLoading}
+          >
+            {resendCountdown > 0
+              ? `Resend OTP in ${resendCountdown}s`
+              : sendotpLoading
+                ? "Sending OTP..."
+                : "Resend OTP"}
+          </button>
         </div>
       )}
 
       <div className="footer-row">
-        <button onClick={() => { setLoginMethod(null); setOtpSent(false); }}>
+        <button onClick={() => {
+          setLoginMethod(null);
+          setOtpSent(false);
+          setResendCountdown(0);
+        }}>
           ← Back
         </button>
         <button onClick={onSwitchToSignup} className="link-btn">
