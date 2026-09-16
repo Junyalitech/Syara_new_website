@@ -18,6 +18,7 @@ import { fetchProfile } from "./features/auth/profileSlice";
 import PrivacyPolicy from "./components/Policy/PrivacyPolicy";
 import TermsCondition from "./components/Policy/Terms&Condition";
 import ReturnPolicy from "./components/Policy/ReturnPolicy";
+import NotFoundPage from "./Pages/NotFoundPage";
 
 const queryClient = new QueryClient();
 
@@ -78,6 +79,9 @@ const App = () => {
                 <Route path="/privacypolicy" element={<PrivacyPolicy/>} />
                 <Route path="/returnpolicy" element={<ReturnPolicy />} />
                 <Route path="/termsofservice" element={<TermsCondition />} />
+
+                
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </BrowserRouter>
           </TooltipProvider>
