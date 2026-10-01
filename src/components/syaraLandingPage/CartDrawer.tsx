@@ -1,4 +1,4 @@
-import { Minus, Plus, Trash2, X } from "lucide-react";
+import { Minus, Plus, Trash2, X, PhoneCall } from "lucide-react";
 import "./CartDrawer.css";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -38,6 +38,8 @@ const CartDrawer = ({ open, onClose,
   const [localItems, setLocalItems] = useState([]);
   const [isDirty, setIsDirty] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [bulkOrderOpen, setBulkOrderOpen] = useState(false);
+  const [contactPhone, setContactPhone] = useState("8826540148");
 
   const [items, setItems] = useState([]);
 
@@ -92,6 +94,43 @@ const CartDrawer = ({ open, onClose,
   }, 0);
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
+  const getItemWeightKg = (item) => {
+    if (item.package === "1kg") return 1;
+    if (item.package === "500gm") return 0.5;
+
+    const weight = Number(item.weight || item.weightKg || 0);
+    return Number.isFinite(weight) ? weight : 0;
+  };
+
+  const totalCartWeightKg = items.reduce(
+    (sum, item) => sum + getItemWeightKg(item) * Number(item.quantity || 0),
+    0
+  );
+
+  // Existing Syara cart API exposes the contact number as Shipping_contact.
+  // useEffect(() => {
+  //   const fetchContactNumber = async () => {
+  //     const userId = localStorage.getItem("syaraid");
+  //     if (!userId) return;
+
+  //     try {
+  //       const res = await axios.get(
+  //         `${import.meta.env.VITE_API_URL}/user/${userId}`
+  //       );
+
+  //       const phone =
+  //         res.data?.[0]?.Shipping_contact ||
+  //         res.data?.Shipping_contact ||
+  //         "";
+
+  //       if (phone) setContactPhone(String(phone));
+  //     } catch (error) {
+  //       console.error("Failed to fetch contact number:", error);
+  //     }
+  //   };
+
+  //   fetchContactNumber();
+  // }, [open]);
 
   const onUpdateQuantity = (item, delta) => {
     const newQty = Math.max(1, item.quantity + delta);
@@ -149,6 +188,11 @@ const CartDrawer = ({ open, onClose,
   };
 
   const proceed = async () => {
+    if (totalCartWeightKg > 20) {
+      setBulkOrderOpen(true);
+      return;
+    }
+
     const userId = localStorage.getItem("syaraid");
 
     const cart = getCart();
@@ -323,6 +367,11 @@ const CartDrawer = ({ open, onClose,
             <button
               className="cd-checkout"
               onClick={() => {
+                if (totalCartWeightKg > 20) {
+                  setBulkOrderOpen(true);
+                  return;
+                }
+
                 if (loggedin) {
                   proceed();
                 } else {
@@ -336,6 +385,81 @@ const CartDrawer = ({ open, onClose,
         )}
 
       </div>
+
+      {bulkOrderOpen && (
+        <div
+          onClick={() => setBulkOrderOpen(false)}
+          style={{
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 9999, padding: "20px"
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "100%", maxWidth: "430px", background: "#fff",
+              borderRadius: "16px", padding: "28px 24px", textAlign: "center",
+              boxShadow: "0 20px 60px rgba(0,0,0,0.25)"
+            }}
+          >
+            <div style={{
+              width: "58px", height: "58px", margin: "0 auto 16px",
+              borderRadius: "50%", background: "#fff3e0", color: "#e65100",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: "28px", fontWeight: 700
+            }}>!</div>
+
+            <h3 style={{ margin: "0 0 10px", fontSize: "21px", color: "#222" }}>
+              Bulk Order
+            </h3>
+
+            <p style={{ margin: "0 auto 8px", color: "#555", lineHeight: 1.5, fontSize: "15px" }}>
+              Your cart weight is <strong>{totalCartWeightKg.toFixed(2)} kg</strong>,
+              which is above our 20 kg checkout limit.
+            </p>
+
+            <p style={{ margin: "0 auto 22px", color: "#555", lineHeight: 1.5, fontSize: "15px" }}>
+              For bulk orders above 20 kg, please contact us to place your order.
+            </p>
+
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              <button
+                type="button"
+                onClick={() => setBulkOrderOpen(false)}
+                style={{
+                  flex: 1, padding: "12px 16px", border: "1px solid #ddd",
+                  borderRadius: "9px", background: "#fff", color: "#333",
+                  cursor: "pointer", fontWeight: 600
+                }}
+              >
+                Close
+              </button>
+
+              <a
+                href={contactPhone ? `tel:${contactPhone}` : undefined}
+                onClick={(e) => { if (!contactPhone) e.preventDefault(); }}
+                style={{
+                  flex: 1, padding: "12px 16px", borderRadius: "9px",
+                  background: contactPhone ? "#307533" : "#aaa", color: "#fff",
+                  textDecoration: "none", cursor: contactPhone ? "pointer" : "not-allowed",
+                  fontWeight: 600, display: "flex", alignItems: "center",
+                  justifyContent: "center", gap: "7px"
+                }}
+              >
+                <PhoneCall size={17} />
+                Call Us
+              </a>
+            </div>
+
+            {!contactPhone && (
+              <p style={{ margin: "12px 0 0", color: "#999", fontSize: "12px" }}>
+                Contact number is currently unavailable.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       <AuthModal
         open={authOpen}

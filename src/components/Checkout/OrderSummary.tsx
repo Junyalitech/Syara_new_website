@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setCartItems, fetchUserCart } from "../../features/cart/cartSlice";
 import OrderSuccessModal from "./OrderSuccessModal";
-import { set } from "date-fns";
 import toast from "react-hot-toast";
 import { fetchProfile } from "../../features/auth/profileSlice";
 
@@ -19,6 +18,7 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
   const dispatch = useDispatch();
   const { profile } = useSelector((state) => state.user);
   const [items, setItems] = useState([]);
+  const [contactPhone, setContactPhone] = useState("");
 
   // const { items } = useSelector((state: any) => state.cart);
   useEffect(() => {
@@ -43,6 +43,21 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
     if (token) {
       dispatch(fetchProfile()); // 🔥 THIS IS MISSING
     }
+  }, []);
+
+  // Fetch the support phone number from the contact-info API.
+  useEffect(() => {
+    const fetchContactInfo = async () => {
+      try {
+        const res = await fetch("https://syararetail.com/api/contact-info/api");
+        const data = await res.json();
+        setContactPhone(data?.data?.phone || "");
+      } catch (err) {
+        console.error("Failed to fetch contact info:", err);
+      }
+    };
+
+    fetchContactInfo();
   }, []);
 
   useEffect(() => {
@@ -82,22 +97,69 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
     return sum + price * item.quantity;
   }, 0);
 
+  // Convert the selected package size into kilograms.
+  // Examples: 1kg => 1, 500gm => 0.5.
+  const getItemWeightKg = (item) => {
+    const packageValue = String(item?.package || "").trim().toLowerCase();
+
+    const kgMatch = packageValue.match(/([0-9]+(?:\.[0-9]+)?)\s*kg/);
+    if (kgMatch) {
+      return Number(kgMatch[1]) || 0;
+    }
+
+    const gmMatch = packageValue.match(/([0-9]+(?:\.[0-9]+)?)\s*g(?:m)?/);
+    if (gmMatch) {
+      return (Number(gmMatch[1]) || 0) / 1000;
+    }
+
+    return 0;
+  };
+
+  // Total physical weight of all products in the cart.
+  const totalCartWeightKg = items.reduce((sum, item) => {
+    return sum + getItemWeightKg(item) * Number(item.quantity || 0);
+  }, 0);
+
+  // Courier billing is based on: total cart weight + 1kg.
+  const courierBillableWeightKg = totalCartWeightKg + 1;
+
+  const getDeliveryOptionKey = (method) => ({
+    porter: "porter",
+    road: "courier_road",
+    air: "courier_air",
+    free: "free_delivery",
+  }[method]);
+
+  const selectedDeliveryOption =
+    deliveryOptions?.delivery_options?.[getDeliveryOptionKey(deliveryMethod)];
+
+  const hasLiquidProduct = items.some((item) => item.is_liquid === true);
+
+  const hasNonAirDeliveryOption = Boolean(
+    deliveryOptions?.delivery_options?.free_delivery?.available ||
+    deliveryOptions?.delivery_options?.porter?.available ||
+    deliveryOptions?.delivery_options?.courier_road?.available
+  );
+
+  const airAvailable =
+    deliveryOptions?.delivery_options?.courier_air?.available === true;
+
+  // If a liquid product is present:
+  // - hide Air when another delivery option exists
+  // - show Air disabled when Air is the only available option
+  const airDisabled = airAvailable && hasLiquidProduct && !hasNonAirDeliveryOption;
+  const showAirOption =
+    airAvailable && (!hasLiquidProduct || !hasNonAirDeliveryOption);
+
   let deliveryFee = 0;
 
-  if (deliveryOptions) {
-    if (deliveryMethod === "porter") {
-      deliveryFee = deliveryOptions.delivery_options.porter?.charge || 0;
-    }
-
-    if (deliveryMethod === "road") {
-      deliveryFee = deliveryOptions.delivery_options.courier_road?.charge || 0;
-    }
-
-    if (deliveryMethod === "air") {
-      deliveryFee = deliveryOptions.delivery_options.courier_air?.charge || 0;
-    }
-
-    if (deliveryMethod === "free") {
+  if (selectedDeliveryOption?.available) {
+    if (deliveryMethod === "road" || deliveryMethod === "air") {
+      const courierCharge = Number(selectedDeliveryOption.charge || 0);
+      deliveryFee = courierCharge * courierBillableWeightKg;
+    } else if (deliveryMethod === "porter") {
+      deliveryFee = Number(selectedDeliveryOption.charge || 0);
+    } else if (deliveryMethod === "free") {
       deliveryFee = 0;
     }
   }
@@ -105,7 +167,7 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
   useEffect(() => {
     if (!deliveryOptions) return;
 
-    const d = deliveryOptions.delivery_options;
+    const d = deliveryOptions.delivery_options || {};
 
     if (d.free_delivery?.available) {
       setDeliveryMethod("free");
@@ -113,10 +175,17 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
       setDeliveryMethod("porter");
     } else if (d.courier_road?.available) {
       setDeliveryMethod("road");
-    } else if (d.courier_air?.available) {
+    } else if (d.courier_air?.available && !(hasLiquidProduct && !(
+      d.free_delivery?.available ||
+      d.porter?.available ||
+      d.courier_road?.available
+    ))) {
       setDeliveryMethod("air");
+    } else {
+      // Air is the only option but cannot carry liquid products.
+      setDeliveryMethod(null);
     }
-  }, [deliveryOptions]);
+  }, [deliveryOptions, hasLiquidProduct]);
 
   const taxes = 0.0;
   const total = subtotal + deliveryFee + taxes;
@@ -126,6 +195,15 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
   console.log("orderssummary", items)
 
   const handlePlaceOrder = async () => {
+    if (!deliveryMethod || airDisabled) {
+      toast.error(
+        hasLiquidProduct
+          ? `This order cannot be placed by Air because it contains a liquid product. Please contact ${contactPhone || "support"}.`
+          : "Please select a valid delivery method."
+      );
+      return;
+    }
+
     try {
       setLoading(true);
       const products = items.map(item => ({
@@ -151,7 +229,7 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
           // ✅ REQUIRED FIELDS
           pincode: pincode,
           deliveryType: deliveryMethod,  // porter / road / air / free
-          deliveryTime: deliveryOptions?.delivery_options?.[deliveryMethod]?.time || "N/A",
+          deliveryTime: selectedDeliveryOption?.time || "N/A",
           subtotal: subtotal,
           address: checkoutAddress       // NOT total
         })  
@@ -241,7 +319,7 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
 
   };
 
-  const hasLiquidProduct = items.some(item => item.is_liquid === true);
+  // const hasLiquidProduct = items.some(item => item.is_liquid === true);
 
 
   return (
@@ -329,20 +407,31 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
                 </div>
 
                 <div className="price">
-                  ₹{deliveryOptions.delivery_options.courier_road.charge}
+                  ₹{Number(deliveryOptions.delivery_options.courier_road.charge || 0) * courierBillableWeightKg}
                 </div>
               </div>
             </label>
           )}
 
-          {deliveryOptions?.delivery_options?.courier_air?.available && !hasLiquidProduct && (
-            <label className={`delivery-card ${deliveryMethod === "air" ? "active" : ""}`}>
+          {showAirOption && (
+            <label
+              className={`delivery-card ${deliveryMethod === "air" ? "active" : ""} ${airDisabled ? "disabled" : ""}`}
+              style={{
+                opacity: airDisabled ? 0.6 : 1,
+                cursor: airDisabled ? "not-allowed" : "pointer",
+              }}
+            >
               <input
                 type="radio"
                 name="delivery"
                 value="air"
                 checked={deliveryMethod === "air"}
-                onChange={() => setDeliveryMethod("air")}
+                disabled={airDisabled}
+                onChange={() => {
+                  if (!airDisabled) {
+                    setDeliveryMethod("air");
+                  }
+                }}
               />
 
               <div className="delivery-content">
@@ -350,12 +439,41 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
                   <span className="icon">✈️</span>
                   <div>
                     <p className="title">Courier Air</p>
-                    <p className="time">{deliveryOptions.delivery_options.courier_air.time}</p>
+                    <p className="time">
+                      {deliveryOptions.delivery_options.courier_air.time}
+                    </p>
+
+                    {airDisabled && (
+                      <p
+                        className="time"
+                        style={{
+                          color: "#c0392b",
+                          marginTop: "4px",
+                          fontSize: "12px",
+                          lineHeight: "1.4",
+                        }}
+                      >
+                        Due to liquid product, we can't place this order by Air.
+                        {contactPhone && (
+                          <>
+                            {" "}Please contact{" "}
+                            <a
+                              href={`tel:${contactPhone}`}
+                              onClick={(e) => e.stopPropagation()}
+                              style={{ fontWeight: 700 }}
+                            >
+                              {contactPhone}
+                            </a>
+                            .
+                          </>
+                        )}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div className="price">
-                  ₹{deliveryOptions.delivery_options.courier_air.charge}
+                  ₹{Number(deliveryOptions.delivery_options.courier_air.charge || 0) * courierBillableWeightKg}
                 </div>
               </div>
             </label>
@@ -397,6 +515,48 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
         <button className="promo-apply-btn">Apply</button>
       </div> */}
 
+        {/* {(deliveryMethod === "road" || deliveryMethod === "air") &&
+          selectedDeliveryOption?.available && (
+            <div
+              style={{
+                fontSize: "12px",
+                color: "#666",
+                marginBottom: "8px",
+              }}
+            >
+              Courier weight: {totalCartWeightKg.toFixed(2)} kg + 1 kg ={" "}
+              {courierBillableWeightKg.toFixed(2)} kg
+            </div>
+          )} */}
+
+        {hasLiquidProduct && airDisabled && (
+          <div
+            style={{
+              marginBottom: "12px",
+              padding: "10px 12px",
+              borderRadius: "8px",
+              background: "#fff4f2",
+              color: "#c0392b",
+              fontSize: "13px",
+              lineHeight: "1.5",
+            }}
+          >
+            Air courier is unavailable because your cart contains a liquid
+            product. Please contact{" "}
+            {contactPhone ? (
+              <a
+                href={`tel:${contactPhone}`}
+                style={{ color: "inherit", fontWeight: 700 }}
+              >
+                {contactPhone}
+              </a>
+            ) : (
+              "support"
+            )}{" "}
+            to place the order.
+          </div>
+        )}
+
         <div className="summary-lines">
           <div className="summary-line">
             <span>Subtotal</span>
@@ -422,10 +582,10 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
         </div>
 
         <button
-          disabled={loading || !deliveryOptions}
+          disabled={loading || !deliveryOptions || !deliveryMethod || airDisabled}
           style={{
-            opacity: loading || !deliveryOptions ? 0.6 : 1,
-            cursor: loading || !deliveryOptions ? "not-allowed" : "pointer",
+            opacity: loading || !deliveryOptions || !deliveryMethod || airDisabled ? 0.6 : 1,
+            cursor: loading || !deliveryOptions || !deliveryMethod || airDisabled ? "not-allowed" : "pointer",
           }}
           className="cta-primary cta-primary--green" onClick={handlePlaceOrder}>
           {loading
