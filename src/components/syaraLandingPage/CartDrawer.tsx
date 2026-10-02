@@ -41,6 +41,7 @@ const CartDrawer = ({ open, onClose,
   const [bulkOrderOpen, setBulkOrderOpen] = useState(false);
   const [contactPhone, setContactPhone] = useState("");
 
+  
   const [items, setItems] = useState([]);
 
   useEffect(() => {
