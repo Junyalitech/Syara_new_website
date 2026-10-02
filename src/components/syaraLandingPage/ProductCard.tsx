@@ -47,7 +47,7 @@ const ProductCard = ({ product }) => {
       Pack1kgprice: product.packeoption1kgrate,
       Pack500gprice: product.packeoption500gmrate,
       stock: product.stock,
-      slug:product.slug,
+      slug: product.slug,
       is_liquid: product.is_liquid,
     };
 
@@ -69,7 +69,7 @@ const ProductCard = ({ product }) => {
     <div className="gm-product-card" onClick={productview}>
       <div className="gm-product-image-wrapper">
         <img
-          style={{objectFit:'cover'}}
+          style={{ objectFit: 'cover' }}
           src={`${import.meta.env.VITE_API_URL}/public/userImages/${product.image1}`}
           alt={product.productName}
           className="gm-product-image"
@@ -95,26 +95,30 @@ const ProductCard = ({ product }) => {
         className="gm-pack-options"
         onClick={(e) => e.stopPropagation()}
       >
-        <label className={selectedPack === "1kg" ? "active" : ""}>
-          <input
-            type="radio"
+        {product.packeoption1kgrate && (
+          <label className={selectedPack === "1kg" ? "active" : ""}>
+            <input
+              type="radio"
 
-            style={{ marginRight: 4 }}
-            checked={selectedPack === "1kg"}
-            onChange={() => setSelectedPack("1kg")}
-          />
-          {product.is_liquid ? "1l" : "1kg"} 
-        </label>
+              style={{ marginRight: 4 }}
+              checked={selectedPack === "1kg"}
+              onChange={() => setSelectedPack("1kg")}
+            />
+            {product.is_liquid ? "1l" : "1kg"}
+          </label>
+        )}
 
-        <label className={selectedPack === "500gm" ? "active" : ""}>
-          <input
-            style={{ marginRight: 4 }}
-            type="radio"
-            checked={selectedPack === "500gm"}
-            onChange={() => setSelectedPack("500gm")}
-          />
-          {product.is_liquid ? "500ml" : "500g"}
-        </label>
+        {product.packeoption500gmrate && (
+          <label className={selectedPack === "500gm" ? "active" : ""}>
+            <input
+              style={{ marginRight: 4 }}
+              type="radio"
+              checked={selectedPack === "500gm"}
+              onChange={() => setSelectedPack("500gm")}
+            />
+            {product.is_liquid ? "500ml" : "500g"}
+          </label>
+        )}
       </div>
 
       <button

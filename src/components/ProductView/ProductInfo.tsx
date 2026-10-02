@@ -35,7 +35,7 @@ const ProductInfo = ({ product, loading }: any) => {
   const { cartId, items } = useSelector((state: any) => state.cart);
 
   const [quantity, setQuantity] = useState(1);
-  const [selectedPack, setSelectedPack] = useState("1kg");
+  const [selectedPack, setSelectedPack] = useState("1kg" | "500gm");
 
   const price =
     selectedPack === "1kg"
@@ -151,7 +151,9 @@ const ProductInfo = ({ product, loading }: any) => {
       <div className="package-select">
         <p>Select Pack:</p>
 
+        
         <div className="pack-options">
+          {product?.packeoption1kgrate && (
           <button
             className={selectedPack === "1kg" ? "active" : ""}
             onClick={() => setSelectedPack("1kg")}
@@ -161,7 +163,8 @@ const ProductInfo = ({ product, loading }: any) => {
             {product?.is_liquid ? "1l" : "1kg"} - ₹
             {product?.packeoption1kgrate}
           </button>
-
+        )}
+        {product?.packeoption500gmrate && (
           <button
             className={selectedPack === "500gm" ? "active" : ""}
             onClick={() => setSelectedPack("500gm")}
@@ -169,6 +172,7 @@ const ProductInfo = ({ product, loading }: any) => {
             {product?.is_liquid ? "500ml" : "500g"} - ₹
             {product?.packeoption500gmrate}
           </button>
+        )}
         </div>
       </div>
 
