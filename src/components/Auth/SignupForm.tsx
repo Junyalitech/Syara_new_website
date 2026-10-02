@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./SignupForm.css";
 import { OtpInput } from "./OtpInput";
 import { useDispatch, useSelector } from "react-redux";
-import { registerUser } from "../../features/auth/authslice";
+import { registerUser, clearError } from "../../features/auth/authslice";
+import toast from "react-hot-toast";
 import { fetchUserCartAPI, replaceCart } from "../../features/cart/cartUtils";
 import { createCartAPI } from "../../features/cart/cartSlice";
 
@@ -15,7 +16,28 @@ export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps
   const [step, setStep] = useState<1 | 2>(1);
   const [registerLoading, setRegisterLoading] = useState(false);
   const [verifyButtonLoading, setVerifyButtonLoading] = useState(false);
+  const [resendOtpLoading, setResendOtpLoading] = useState(false);
+  const [resendCountdown, setResendCountdown] = useState(0);
   const dispatch = useDispatch();
+
+  const clearAuthError = () => {
+    dispatch(clearError());
+  };
+
+  useEffect(() => {
+    clearAuthError();
+  }, []);
+
+  // 30-second resend OTP countdown
+  useEffect(() => {
+    if (resendCountdown <= 0) return;
+
+    const timer = window.setInterval(() => {
+      setResendCountdown((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [resendCountdown]);
   const { loading, error } = useSelector((state) => state.auth);
   // ✅ form states
   const [name, setName] = useState("");
@@ -71,12 +93,52 @@ export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps
       console.log("Signup success:", res);
 
       setStep(2); // OTP step
+      setResendCountdown(30); // Start 30-second resend cooldown
 
     } catch (err) {
       console.error("Signup error:", err);
     }
     finally {
       setRegisterLoading(false);
+    }
+  };
+
+  // ================= RESEND OTP =================
+  const handleResendOtp = async () => {
+    if (resendCountdown > 0 || resendOtpLoading || !validatePhone(phone)) return;
+
+    try {
+      setResendOtpLoading(true);
+
+      // Use the signup OTP endpoint so the backend sends the signup OTP template.
+      // If your backend uses a different signup-specific endpoint, replace this URL.
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/signup-send-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ phone }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        console.error("Resend signup OTP failed:", data.message);
+        toast.error(data.message || "Failed to resend OTP");
+        return;
+      }
+
+      console.log("Signup OTP resent:", data);
+      toast.success("OTP resent successfully");
+
+      // Clear old OTP and restart the 30-second cooldown.
+      setOtp("");
+      setResendCountdown(30);
+    } catch (error) {
+      console.error("Error resending signup OTP:", error);
+      toast.error("Unable to resend OTP. Please try again.");
+    } finally {
+      setResendOtpLoading(false);
     }
   };
 
@@ -157,7 +219,7 @@ export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps
     } catch (error) {
       console.error("Error verifying OTP:", error);
     }
-    finally{
+    finally {
       setVerifyButtonLoading(false);
     }
   };
@@ -262,12 +324,28 @@ export const SignupForm = ({ onSwitchToLogin, onSignupSuccess }: SignupFormProps
           {verifyButtonLoading ? "Verifying..." : "Verify & Create Account"}
         </button>
 
-        {/* <button className="secondary-btn">
-          Resend code
-        </button> */}
+        <button
+          type="button"
+          className="secondary-btn"
+          onClick={handleResendOtp}
+          disabled={resendCountdown > 0 || resendOtpLoading}
+        >
+          {resendCountdown > 0
+            ? `Resend OTP in ${resendCountdown}s`
+            : resendOtpLoading
+              ? "Sending OTP..."
+              : "Resend OTP"}
+        </button>
       </div>
 
-      <button className="back-btn" >
+      <button
+        className="back-btn"
+        onClick={() => {
+          setStep(1);
+          setOtp("");
+          setResendCountdown(0);
+        }}
+      >
         ← Back
       </button>
     </div>
