@@ -39,7 +39,7 @@ const CartDrawer = ({ open, onClose,
   const [isDirty, setIsDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [bulkOrderOpen, setBulkOrderOpen] = useState(false);
-  const [contactPhone, setContactPhone] = useState("8826540148");
+  const [contactPhone, setContactPhone] = useState("");
 
   const [items, setItems] = useState([]);
 
@@ -107,30 +107,26 @@ const CartDrawer = ({ open, onClose,
     0
   );
 
-  // Existing Syara cart API exposes the contact number as Shipping_contact.
-  // useEffect(() => {
-  //   const fetchContactNumber = async () => {
-  //     const userId = localStorage.getItem("syaraid");
-  //     if (!userId) return;
 
-  //     try {
-  //       const res = await axios.get(
-  //         `${import.meta.env.VITE_API_URL}/user/${userId}`
-  //       );
+  useEffect(() => {
+    const fetchContactNumber = async () => {
+      try {
+        const res = await axios.get(
+          `${import.meta.env.VITE_API_URL}/contact-info/api`
+        );
 
-  //       const phone =
-  //         res.data?.[0]?.Shipping_contact ||
-  //         res.data?.Shipping_contact ||
-  //         "";
+        const phone = res.data?.data?.phone || "";
 
-  //       if (phone) setContactPhone(String(phone));
-  //     } catch (error) {
-  //       console.error("Failed to fetch contact number:", error);
-  //     }
-  //   };
+        if (phone) {
+          setContactPhone(String(phone));
+        }
+      } catch (error) {
+        console.error("Failed to fetch contact number:", error);
+      }
+    };
 
-  //   fetchContactNumber();
-  // }, [open]);
+    fetchContactNumber();
+  }, [open]);
 
   const onUpdateQuantity = (item, delta) => {
     const newQty = Math.max(1, item.quantity + delta);
@@ -329,7 +325,7 @@ const CartDrawer = ({ open, onClose,
                         <Plus size={14} />
                       </button>
 
-                      
+
                     </div>
                   </div>
 
