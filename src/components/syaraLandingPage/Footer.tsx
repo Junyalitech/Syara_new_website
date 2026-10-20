@@ -98,8 +98,12 @@ const Footer: React.FC = () => {
             ) : (
               <ul>
                 <li>📍 Mayur Vihar Phase I, Kalyanvas, Vinod Nagar East, Delhi, 110091</li>
-                <li>📞 +91 {contact?.data?.phone}</li>
-                <li>✉️ {contact?.data?.email}</li>
+                <li><a href={`tel:+91 ${contact?.data?.phone}`} target="_blank" rel="noopener noreferrer">
+                  📞 +91 {contact?.data?.phone}
+                </a></li>
+                <li><a href={`mailto:${contact?.data?.email}`} target="_blank" rel="noopener noreferrer">
+                  ✉️ {contact?.data?.email}
+                </a></li>
               </ul>
             )}
 

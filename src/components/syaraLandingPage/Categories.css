@@ -29,12 +29,15 @@
 .gm-categories-grid {
   display: flex;
   justify-content: center;
-  gap: 48px;
+  align-items: flex-start;
+  gap: 24px;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
-  padding: 30px 40px;
+  padding: 28px 42px 24px;
   background: #fff;
   border-radius: 12px;
+  scrollbar-width: none;
 }
 
 .gm-categories-grid::-webkit-scrollbar {
@@ -74,29 +77,30 @@
 }
 
 
-.gm-category-item{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
-  cursor:pointer;
-  transition: transform 0.25s ease;
+.gm-category-item {
+  flex: 0 0 132px;
+  width: 132px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  text-align: center;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: transform 0.22s ease;
 }
 
-.gm-category-item:hover{
-  transform: translateY(-8px);
+.gm-category-item:hover {
+  transform: translateY(-4px);
 }
 
 .gm-category-icon {
   width: 100px;
   height: 100px;
+  flex: 0 0 100px;
   border-radius: 50%;
   background: #f0f9f0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36px;
-  transition: all 0.3s ease;
   overflow: hidden;
 }
 
@@ -113,10 +117,21 @@
   object-fit: cover;
 }
 
+
 .gm-category-name {
+  display: -webkit-box;
+  width: 100%;
+  min-height: 40px;
+  overflow: hidden;
+  color: #333;
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  line-height: 20px;
+  text-align: center;
+  overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
 }
 
 .gm-category-item {
@@ -154,5 +169,30 @@
 @keyframes shimmer {
   100% {
     left: 150%;
+  }
+}
+
+@media (max-width: 768px) {
+  .gm-categories-grid {
+    justify-content: flex-start !important;
+    gap: 16px;
+    padding: 20px 28px 18px;
+  }
+
+  .gm-category-item {
+    flex-basis: 112px;
+    width: 112px;
+  }
+
+  .gm-category-icon {
+    width: 84px;
+    height: 84px;
+    flex-basis: 84px;
+  }
+
+  .gm-category-name {
+    font-size: 13px;
+    line-height: 18px;
+    min-height: 36px;
   }
 }
