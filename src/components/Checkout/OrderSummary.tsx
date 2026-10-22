@@ -20,10 +20,33 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
   const [items, setItems] = useState([]);
   const [contactPhone, setContactPhone] = useState("");
 
+const getVariantLabel = (item: any) => {
+  const existing = String(item?.package || item?.pack || "").trim();
+  if (existing && !["1kg", "500gm"].includes(existing.toLowerCase())) return existing;
+  const quantity = item?.variantQuantity ?? item?.quantityValue ?? item?.variant?.quantity;
+  const unit = item?.unit ?? item?.variantUnit ?? item?.variant?.unit;
+  if (quantity != null && unit) return `${quantity} ${String(unit).trim()}`.trim();
+  if (existing) return existing;
+  return "Pack size unavailable";
+};
+
+const getItemWeightKg = (item: any) => {
+  const label = getVariantLabel(item).toLowerCase();
+  const match = label.match(/(\d+(?:\.\d+)?)\s*(kg|g|gm|l|ml)\b/);
+  if (match) {
+    const amount = Number(match[1]);
+    if (match[2] === "kg" || match[2] === "l") return amount;
+    if (match[2] === "g" || match[2] === "gm" || match[2] === "ml") return amount / 1000;
+  }
+  const fallback = Number(item?.weightKg ?? item?.weight ?? 0);
+  return Number.isFinite(fallback) ? fallback : 0;
+};
+
+
   // const { items } = useSelector((state: any) => state.cart);
   useEffect(() => {
     const loadCart = () => {
-      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
       setItems(cart);
     };
 
@@ -87,38 +110,14 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
   console.log("Available delivery options for pincode", pincode, ":", deliveryOptions);
 
   const subtotal = items.reduce((sum, item) => {
-    const price =
-      item.package === "1kg"
-        ? item.Pack1kgprice
-        : item.package === "500gm"
-          ? item.Pack500gprice
-          : item.price;
-
-    return sum + price * item.quantity;
+    return sum + Number(item.price || 0) * Number(item.quantity || 0);
   }, 0);
 
-  // Convert the selected package size into kilograms.
-  // Examples: 1kg => 1, 500gm => 0.5.
-  const getItemWeightKg = (item) => {
-    const packageValue = String(item?.package || "").trim().toLowerCase();
-
-    const kgMatch = packageValue.match(/([0-9]+(?:\.[0-9]+)?)\s*kg/);
-    if (kgMatch) {
-      return Number(kgMatch[1]) || 0;
-    }
-
-    const gmMatch = packageValue.match(/([0-9]+(?:\.[0-9]+)?)\s*g(?:m)?/);
-    if (gmMatch) {
-      return (Number(gmMatch[1]) || 0) / 1000;
-    }
-
-    return 0;
-  };
-
-  // Total physical weight of all products in the cart.
-  const totalCartWeightKg = items.reduce((sum, item) => {
-    return sum + getItemWeightKg(item) * Number(item.quantity || 0);
-  }, 0);
+  // Calculate cart weight from each dynamic variant's pack label.
+  const totalCartWeightKg = items.reduce(
+    (sum, item) => sum + getItemWeightKg(item) * Number(item.quantity || 0),
+    0
+  );
 
   // Courier billing is based on: total cart weight + 1kg.
   const courierBillableWeightKg = totalCartWeightKg + 1;
@@ -133,7 +132,9 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
   const selectedDeliveryOption =
     deliveryOptions?.delivery_options?.[getDeliveryOptionKey(deliveryMethod)];
 
-  const hasLiquidProduct = items.some((item) => item.is_liquid === true);
+  const hasLiquidProduct = items.some((item) =>
+    item.is_liquid === true || item.is_liquid === 1 || item.is_liquid === "1" || item.is_liquid === "true"
+  );
 
   const hasNonAirDeliveryOption = Boolean(
     deliveryOptions?.delivery_options?.free_delivery?.available ||
@@ -207,12 +208,14 @@ const OrderSummary = ({ pincode, checkoutAddress }) => {
     try {
       setLoading(true);
       const products = items.map(item => ({
-        productId: item.productId,
-        quantity: item.quantity,
-        price: item.price,
-        package: item.package,
-        Pack1kgprice: item.Pack1kgprice,
-        Pack500gprice: item.Pack500gprice,
+        productId: item.productId ?? item.id,
+        variantId: item.variantId ?? item.variant?.id,
+        quantity: Number(item.quantity || 0),
+        price: Number(item.price || 0),
+        package: getVariantLabel(item),
+        unit: item.unit ?? item.variantUnit ?? item.variant?.unit,
+        variantQuantity: item.variantQuantity ?? item.quantityValue ?? item.variant?.quantity,
+        is_liquid: item.is_liquid,
       }));
 
       // 🔹 Step 1: Call backend create order

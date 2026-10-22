@@ -5,6 +5,29 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getCart, updateCartQty } from "../../features/cart/cartUtils";
 
+const getVariantLabel = (item: any) => {
+  const existing = String(item?.package || item?.pack || "").trim();
+  if (existing && !["1kg", "500gm"].includes(existing.toLowerCase())) return existing;
+  const quantity = item?.variantQuantity ?? item?.quantityValue ?? item?.variant?.quantity;
+  const unit = item?.unit ?? item?.variantUnit ?? item?.variant?.unit;
+  if (quantity != null && unit) return `${quantity} ${String(unit).trim()}`.trim();
+  if (existing) return existing;
+  return "Pack size unavailable";
+};
+
+const getItemWeightKg = (item: any) => {
+  const label = getVariantLabel(item).toLowerCase();
+  const match = label.match(/(\d+(?:\.\d+)?)\s*(kg|g|gm|l|ml)\b/);
+  if (match) {
+    const amount = Number(match[1]);
+    if (match[2] === "kg" || match[2] === "l") return amount;
+    if (match[2] === "g" || match[2] === "gm" || match[2] === "ml") return amount / 1000;
+  }
+  const fallback = Number(item?.weightKg ?? item?.weight ?? 0);
+  return Number.isFinite(fallback) ? fallback : 0;
+};
+
+
 interface CartItem {
   id: number;
   name: string;
@@ -42,14 +65,17 @@ const ReviewItems = () => {
   // const { items, loading } = useSelector((state: any) => state.cart);
   const [items, setItems] = useState([]);
   useEffect(() => {
-    setItems(getCart());
-  }, [open]);
+    const refreshCart = () => setItems(getCart());
+    refreshCart();
+    window.addEventListener("cartUpdated", refreshCart);
+    return () => window.removeEventListener("cartUpdated", refreshCart);
+  }, []);
 
   const normalizeCart = (items) => {
     const map = new Map();
 
     items.forEach((item) => {
-      const key = `${item.productId || item.id}_${item.package}`;
+      const key = `${item.productId || item.id}_${item.variantId ?? getVariantLabel(item)}`;
 
       if (map.has(key)) {
         map.get(key).quantity += item.quantity;
@@ -164,17 +190,12 @@ const ReviewItems = () => {
           </div> */}
 
           {storeItems.map((item) => {
-            const displayPrice =
-              item.package === "1kg"
-                ? item.Pack1kgprice
-                : item.package === "500gm"
-                  ? item.Pack500gprice
-                  : item.price;
-
-            const itemTotal = displayPrice * item.quantity;
+            const displayPrice = Number(item.price || 0);
+            const variantLabel = getVariantLabel(item);
+            const itemTotal = displayPrice * Number(item.quantity || 0);
 
             return (
-              <div className="item-row" key={item.id} onClick={() => {navigate(`/product/${item.slug}`); }}>
+              <div className="item-row" key={`${item.productId ?? item.id}-${item.variantId ?? variantLabel}`} onClick={() => { navigate(`/product/${item.slug}`); }}>
 
                 {/* LEFT: PRODUCT INFO */}
                 <div className="item-left">
@@ -187,11 +208,11 @@ const ReviewItems = () => {
                   </div>
 
                   <div className="item-details">
-                    <div className="item-name">{item.productName}  <span>({item.package === "1kg" ? item.is_liquid ? "1L" : "1Kg" : item.is_liquid ? "500ML" : "500G"})</span></div>
+                    <div className="item-name">{item.productName || item.name} <span>({variantLabel})</span></div>
                     {/* <div className="item-package"></div> */}
                     <div className="item-right">
-                      <div className="item-price">₹{displayPrice.toFixed(0)} × {item.quantity}</div>
-                     <span>₹{(displayPrice * item.quantity).toFixed(0)} </span> 
+                      <div className="item-price">₹{displayPrice.toFixed(2)} × {item.quantity}</div>
+                     <span>₹{itemTotal.toFixed(2)}</span> 
                     </div></div>
                 </div>
 
@@ -211,7 +232,7 @@ const ReviewItems = () => {
                         e.stopPropagation();
                         onUpdateQuantity(item, 1);
                       }
-                    }}>+</button>
+                    }} disabled={Number(item.quantity) >= Number(item.stock ?? 0)}>+</button>
                 </div>
 
                 {/* RIGHT: TOTAL */}

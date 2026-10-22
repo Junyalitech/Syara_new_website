@@ -1,206 +1,204 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import "./ProductInfo.css";
-import { useDispatch, useSelector } from "react-redux";
-
-import {
-  createCartAPI,
-  insertProductAPI,
-  setCartItems,
-  fetchUserCart,
-} from "../../features/cart/cartSlice";
+import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { addToCart } from "../../features/cart/cartUtils";
 
-const StarRating = ({ rating }: { rating: number }) => (
-  <div className="rating">
-    <div className="stars">
-      {[1, 2, 3, 4, 5].map((star) => (
-        <svg
-          key={star}
-          className={`star ${star <= rating ? "filled" : ""}`}
-          viewBox="0 0 24 24"
-        >
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-        </svg>
-      ))}
-    </div>
-  </div>
-);
+type Variant = {
+  id: number | string;
+  quantity: number | string;
+  unit: string;
+  price: number | string;
+  stock: number | string;
+  status?: string;
+};
+
+const getVariantLabel = (variant?: Variant) => {
+  if (!variant) return "";
+  const quantity = variant.quantity ?? "";
+  const unit = String(variant.unit ?? "").trim();
+  const normalized = unit.toLowerCase();
+  const displayUnit =
+    normalized === "g" ? "g" :
+    normalized === "kg" ? "kg" :
+    normalized === "ml" ? "ml" :
+    normalized === "l" ? "L" :
+    normalized === "pc" || normalized === "pcs" ? "pcs" : unit;
+  return `${quantity}${displayUnit ? ` ${displayUnit}` : ""}`.trim();
+};
 
 const ProductInfo = ({ product, loading }: any) => {
-  const dispatch = useDispatch();
+  const { loading: cartLoading } = useSelector((state: any) => state.cart);
 
-  const [adding, setAdding] = useState(false);
-  const { cartId, items } = useSelector((state: any) => state.cart);
+  const variants: Variant[] = useMemo(
+    () =>
+      (Array.isArray(product?.variants) ? product.variants : []).filter(
+        (variant: Variant) =>
+          variant &&
+          variant.status !== "deactive" &&
+          variant.status !== "inactive"
+      ),
+    [product?.variants]
+  );
 
+  const [selectedVariantId, setSelectedVariantId] = useState<string>(
+    variants[0]?.id != null ? String(variants[0].id) : ""
+  );
   const [quantity, setQuantity] = useState(1);
-  const [selectedPack, setSelectedPack] = useState("1kg" | "500gm");
+  const [adding, setAdding] = useState(false);
 
-  const price =
-    selectedPack === "1kg"
-      ? product?.packeoption1kgrate
-      : product?.packeoption500gmrate;
+  useEffect(() => {
+    if (!variants.some((variant) => String(variant.id) === selectedVariantId)) {
+      setSelectedVariantId(variants[0]?.id != null ? String(variants[0].id) : "");
+      setQuantity(1);
+    }
+  }, [variants, selectedVariantId]);
+
+  const selectedVariant =
+    variants.find((variant) => String(variant.id) === selectedVariantId) ||
+    variants[0];
+  const price = Number(selectedVariant?.price ?? 0);
+  const stock = Number(selectedVariant?.stock ?? 0);
+  const outOfStock = !selectedVariant || stock <= 0;
+
+  const selectVariant = (variant: Variant) => {
+    setSelectedVariantId(String(variant.id));
+    setQuantity(1);
+  };
 
   const useraddToCartHandler = () => {
+    if (!selectedVariant) {
+      toast.error("No product variants are available");
+      return;
+    }
+    if (stock <= 0) {
+      toast.error("This pack is out of stock");
+      return;
+    }
+    if (quantity > stock) {
+      toast.error(`Only ${stock} available for this pack`);
+      setQuantity(Math.max(1, stock));
+      return;
+    }
+
+    setAdding(true);
     const cartItem = {
       productId: product.id,
-      quantity: quantity,
-      package: selectedPack,
+      variantId: selectedVariant.id,
+      quantity,
+      package: getVariantLabel(selectedVariant),
       price,
       productName: product.productName,
       image: product.image1,
-      Pack1kgprice: product.packeoption1kgrate,
-      Pack500gprice: product.packeoption500gmrate,
-      stock: product.stock,
+      stock,
       slug: product.slug,
       is_liquid: product.is_liquid,
     };
 
-    // Check if product already exists in cart
-    const existingItem = items?.find(
-      (item: any) => item.productId === product.id
-    );
+    const result = addToCart(cartItem);
+    setAdding(false);
 
-    if (existingItem) {
-      // Product already exists → replace quantity
-      const updatedItems = items.map((item: any) =>
-        item.productId === product.id
-          ? {
-            ...item,
-            quantity: quantity,
-            package: selectedPack,
-            price,
-          }
-          : item
-      );
-
-      dispatch(setCartItems(updatedItems));
-
-      // Keep localStorage/cart utility in sync if your cart uses localStorage
-      localStorage.setItem("cartItems", JSON.stringify(updatedItems));
-
-      window.dispatchEvent(new Event("cartUpdated"));
-
-      toast.success("Cart quantity updated 🛒");
-      return;
-    }
-
-    // Product doesn't exist → add normally
-    const res = addToCart(cartItem);
-
-    if (res.error) {
-      toast.error(res.error);
+    if (result?.error) {
+      toast.error(result.error);
       return;
     }
 
     window.dispatchEvent(new Event("cartUpdated"));
-    if (res.updated) {
-      toast.success("Cart quantity updated 🛒");
-    } else {
-      toast.success("Item added to cart 🛒");
-    }
+    toast.success(result?.updated ? "Cart quantity updated 🛒" : "Item added to cart 🛒");
   };
 
   if (loading) {
     return (
       <div className="product-info">
-        <div className="skeleton title"></div>
-        <div className="skeleton meta"></div>
-        <div className="skeleton price"></div>
-        <div className="skeleton stock"></div>
-        <div className="skeleton pack"></div>
-        <div className="skeleton desc"></div>
-        <div className="skeleton cart"></div>
-        <div className="skeleton payment"></div>
+        <div className="skeleton title" />
+        <div className="skeleton meta" />
+        <div className="skeleton price" />
+        <div className="skeleton stock" />
+        <div className="skeleton pack" />
+        <div className="skeleton desc" />
+        <div className="skeleton cart" />
+        <div className="skeleton payment" />
       </div>
     );
   }
-
-  console.log("Product Info Rendered with product:", product);
 
   return (
     <div className="product-info">
       <div>
         <h1 className="product-title">{product?.productName}</h1>
-
         <div className="product-meta">
           <span>
-            {product?.nickname1}  {product?.nickname2 ? `/ ${product?.nickname2}` : ''} {" "}
-            {product?.nickname3 ? `/ ${product?.nickname3}` : ''}
+            {product?.nickname1}
+            {product?.nickname2 ? ` / ${product.nickname2}` : ""}
+            {product?.nickname3 ? ` / ${product.nickname3}` : ""}
           </span>
-
-          {/* <StarRating rating={4} /> */}
         </div>
       </div>
 
       <div className="price-box">
-        {/* <span className="old-price">₹{product?.oldPrice?.toFixed(2)}</span> */}
         <span className="new-price">
-          ₹{price?.toFixed(2)}
+          {selectedVariant ? `₹${price.toFixed(2)}` : "Price unavailable"}
         </span>
       </div>
 
       <div className="stock">
-        Available only: <span>{product?.stock == 0 ? "Out of Stock" : `${product?.stock}`}</span>
+        {selectedVariant ? (
+          <>
+            <span className={outOfStock ? "stock-status out" : "stock-status in"}>
+              {outOfStock ? "Out of Stock" : `${stock} in stock`}
+            </span>
+          </>
+        ) : (
+          <span className="stock-status out">No variants available</span>
+        )}
       </div>
 
-
-
-      {/* PACK SELECT */}
       <div className="package-select">
         <p>Select Pack:</p>
-
-        
-        <div className="pack-options">
-          {product?.packeoption1kgrate && (
-          <button
-            className={selectedPack === "1kg" ? "active" : ""}
-            onClick={() => setSelectedPack("1kg")}
-          >
-            {/* {product?.packeoption1kg} */}
-
-            {product?.is_liquid ? "1l" : "1kg"} - ₹
-            {product?.packeoption1kgrate}
-          </button>
+        {variants.length > 0 ? (
+          <div className="pack-options" role="group" aria-label="Select product pack">
+            {variants.map((variant) => {
+              const isSelected = String(variant.id) === String(selectedVariant?.id);
+              const variantStock = Number(variant.stock ?? 0);
+              return (
+                <button
+                  type="button"
+                  key={variant.id}
+                  className={`${isSelected ? "active" : ""} ${variantStock <= 0 ? "variant-out-of-stock" : ""}`}
+                  aria-pressed={isSelected}
+                  onClick={() => selectVariant(variant)}
+                >
+                  <span>{getVariantLabel(variant)}</span>
+                  <span className="variant-price">₹{Number(variant.price ?? 0).toFixed(2)}</span>
+                  {variantStock <= 0 && <span className="variant-unavailable">Out of stock</span>}
+                </button>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="no-variants-message">No pack sizes are currently available.</p>
         )}
-        {product?.packeoption500gmrate && (
-          <button
-            className={selectedPack === "500gm" ? "active" : ""}
-            onClick={() => setSelectedPack("500gm")}
-          >
-            {product?.is_liquid ? "500ml" : "500g"} - ₹
-            {product?.packeoption500gmrate}
-          </button>
-        )}
-        </div>
       </div>
 
-      <p className="product-desc">
-        {product?.description ||
-          "Lorem ipsum dolor sit amet..."}
-      </p>
+      <p className="product-desc">{product?.description || ""}</p>
 
-      {/* 🔥 CART SECTION */}
       <div className="cart-section">
-        <div className="qty-box">
+        <div className="qty-box" aria-label="Quantity">
           <button
-            onClick={() =>
-              setQuantity(Math.max(1, quantity - 1))
-            }
+            type="button"
+            aria-label="Decrease quantity"
+            onClick={() => setQuantity((current) => Math.max(1, current - 1))}
+            disabled={quantity <= 1 || outOfStock}
           >
             <Minus size={16} />
           </button>
-
           <span>{quantity}</span>
-
           <button
-            onClick={() => {
-              if (quantity < product?.stock) {
-                setQuantity(quantity + 1);
-              }
-            }}
-            disabled={quantity >= product?.stock}
+            type="button"
+            aria-label="Increase quantity"
+            onClick={() => setQuantity((current) => Math.min(stock, current + 1))}
+            disabled={outOfStock || quantity >= stock}
           >
             <Plus size={16} />
           </button>
@@ -208,37 +206,20 @@ const ProductInfo = ({ product, loading }: any) => {
 
         <button
           className="add-cart"
-          disabled={loading}
-          onClick={(e) => {
-            e.stopPropagation();
-            useraddToCartHandler();
-          }}
+          type="button"
+          disabled={loading || cartLoading || adding || outOfStock}
+          onClick={useraddToCartHandler}
         >
-          {product?.stock === 0 ? (
-            "Out of Stock"
-          ) : adding ? (
+          {outOfStock ? "Out of Stock" : adding ? (
             <>
-              <span className="spinner"></span>
+              <span className="spinner" />
               Adding...
             </>
           ) : (
-            <>
-              {/* <ShoppingCart size={16} /> */}
-              Add to Cart
-            </>
+            "Add to Cart"
           )}
         </button>
       </div>
-
-      {/* <div className="payment-box">
-        <p>Guaranteed safe & secure checkout</p>
-        <div className="payments">
-          <img src="https://pngimg.com/d/visa_PNG4.png" alt="Visa" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/MasterCard_Logo.svg/1280px-MasterCard_Logo.svg.png" alt="Mastercard" />
-          <img src="https://www.vectorlogo.zone/logos/paypal/paypal-icon.svg" alt="PayPal" />
-          <img src="https://upload.wikimedia.org/wikipedia/commons/3/30/American_Express_logo.svg" alt="Amex" />
-        </div>
-      </div> */}
     </div>
   );
 };

@@ -326,3 +326,145 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* Dynamic variant cart display */
+.cd-item-info {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cd-package {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  max-width: 100%;
+  padding: 4px 7px;
+  margin: 5px 0;
+  border-radius: 6px;
+  background: #f1f8f2;
+  color: #2e7d32;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.cd-item-count {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.cd-stock-warning {
+  margin-top: 5px;
+  color: #c62828;
+  font-size: 11px;
+}
+
+.cd-bulk-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, .55);
+}
+
+.cd-bulk-modal {
+  width: 100%;
+  max-width: 430px;
+  padding: 26px 24px;
+  border-radius: 16px;
+  background: #fff;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+}
+
+.cd-bulk-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  background: #fff3e0;
+  color: #e65100;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.cd-bulk-modal h3 {
+  margin: 0 0 10px;
+  color: #222;
+  font-size: 21px;
+}
+
+.cd-bulk-modal p {
+  margin: 0 auto 12px;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.cd-bulk-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.cd-bulk-actions button,
+.cd-bulk-actions a {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 14px;
+  border: 1px solid #ddd;
+  border-radius: 9px;
+  background: #fff;
+  color: #333;
+  text-decoration: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cd-bulk-actions a.enabled {
+  border-color: #307533;
+  background: #307533;
+  color: #fff;
+}
+
+.cd-bulk-actions a.disabled {
+  background: #aaa;
+  color: #fff;
+  cursor: not-allowed;
+}
+
+.cd-bulk-modal .cd-contact-unavailable {
+  margin-top: 12px;
+  color: #999;
+  font-size: 12px;
+}
+
+@media (max-width: 420px) {
+  .cd-drawer {
+    max-width: 100%;
+  }
+
+  .cd-item img {
+    width: 76px;
+    height: 76px;
+  }
+
+  .cd-item {
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .cd-item-info h3 {
+    font-size: 13px;
+  }
+}

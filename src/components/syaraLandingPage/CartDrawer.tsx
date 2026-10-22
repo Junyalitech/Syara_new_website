@@ -1,187 +1,149 @@
 import { Minus, Plus, Trash2, X, PhoneCall } from "lucide-react";
 import "./CartDrawer.css";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
-import { fetchUserCart, removeCartItemAPI, removeItem, setCartItems, syncCartAPI, updateQty, updateQuantityAPI } from "../../features/cart/cartSlice";
+import { useDispatch } from "react-redux";
+import { useEffect, useMemo, useState } from "react";
+import { syncCartAPI } from "../../features/cart/cartSlice";
 import { AuthModal } from "../Auth/AuthModal";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { getCart, removeFromCart, updateCartQty } from "../../features/cart/cartUtils";
 
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
+type CartItem = {
+  id?: number | string;
+  productId: number | string;
+  variantId?: number | string;
+  productName?: string;
+  name?: string;
+  price: number | string;
   quantity: number;
-  image: string;
-}
+  image?: string;
+  package?: string;
+  pack?: string;
+  stock?: number | string;
+  is_liquid?: boolean | number | string;
+  unit?: string;
+  weight?: number | string;
+  weightKg?: number | string;
+  slug?: string;
+};
 
 interface CartDrawerProps {
   open: boolean;
   onClose: () => void;
-  items: CartItem[];
-  onUpdateQuantity: (id: number, delta: number) => void;
-  onRemove: (id: number) => void;
+  items?: CartItem[];
+  onUpdateQuantity?: (id: number, delta: number) => void;
+  onRemove?: (id: number) => void;
 }
 
-const CartDrawer = ({ open, onClose,
-  //  items,
-  // onUpdateQuantity, onRemove
-}: CartDrawerProps) => {
-  const navigate = useNavigate()
+const getPackageLabel = (item: CartItem) => {
+  if (item.package || item.pack) return String(item.package || item.pack);
+  if (item.variantQuantity != null) {
+    return `${item.variantQuantity} ${item.unit || ""}`.trim();
+  }
+  return "Pack size unavailable";
+};
+
+const getItemWeightKg = (item: CartItem) => {
+  const label = getPackageLabel(item).toLowerCase();
+  const match = label.match(/(\d+(?:\.\d+)?)\s*(kg|g|l|ml)\b/);
+  if (match) {
+    const amount = Number(match[1]);
+    const unit = match[2];
+    if (unit === "kg" || unit === "l") return amount;
+    if (unit === "g") return amount / 1000;
+    if (unit === "ml") return amount / 1000;
+  }
+  const weight = Number(item.weightKg ?? item.weight ?? 0);
+  return Number.isFinite(weight) ? weight : 0;
+};
+
+const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [removingId, setRemovingId] = useState(null);
   const [authOpen, setAuthOpen] = useState(false);
-  // const { items, loading } = useSelector((state: any) => state.cart);
-  const [isLoggedIn, setIsLoggedIn] = useState(localStorage.getItem("syaraid") ? true : false);
-  const [localItems, setLocalItems] = useState([]);
-  const [isDirty, setIsDirty] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem("syaraid")));
+  const [items, setItems] = useState<CartItem[]>([]);
   const [saving, setSaving] = useState(false);
   const [bulkOrderOpen, setBulkOrderOpen] = useState(false);
   const [contactPhone, setContactPhone] = useState("");
 
-  
-  const [items, setItems] = useState([]);
-
   useEffect(() => {
-    setItems(getCart());
+    if (open) setItems(getCart() as CartItem[]);
   }, [open]);
 
   useEffect(() => {
-    const userId = localStorage.getItem("syaraid");
-
-    //   if (open) {
-    //     if (userId) {
-    //       dispatch(fetchUserCart(userId));
-    //     } else {
-    //       // 🟡 LOAD FROM LOCALSTORAGE
-    //       const guestCart = JSON.parse(localStorage.getItem("guestCart")) || [];
-
-    //       dispatch(setCartItems(guestCart));
-    //     }
-    //   }
-  }, [open, dispatch]);
-
-  const normalizeCart = (items) => {
-    const map = new Map();
-
-    items.forEach((item) => {
-      const key = `${item.productId || item.id}_${item.package}`;
-
-      if (map.has(key)) {
-        map.get(key).quantity += item.quantity; // merge qty
-      } else {
-        map.set(key, { ...item });
-      }
-    });
-
-    return Array.from(map.values());
-  };
+    const refreshCart = () => setItems(getCart() as CartItem[]);
+    window.addEventListener("cartUpdated", refreshCart);
+    return () => window.removeEventListener("cartUpdated", refreshCart);
+  }, []);
 
   useEffect(() => {
-    setLocalItems(normalizeCart(items));
-  }, [items]);
-
-  const subtotal = items.reduce((sum, item) => {
-    const price =
-      item.package === "1kg"
-        ? item.Pack1kgprice || item.price
-        : item.package === "500gm"
-          ? item.Pack500gprice || item.price
-          : item.price;
-
-    return sum + price * item.quantity;
-  }, 0);
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-
-  const getItemWeightKg = (item) => {
-    if (item.package === "1kg") return 1;
-    if (item.package === "500gm") return 0.5;
-
-    const weight = Number(item.weight || item.weightKg || 0);
-    return Number.isFinite(weight) ? weight : 0;
-  };
-
-  const totalCartWeightKg = items.reduce(
-    (sum, item) => sum + getItemWeightKg(item) * Number(item.quantity || 0),
-    0
-  );
-
+    setIsLoggedIn(Boolean(localStorage.getItem("syaraid")));
+  }, [open, authOpen]);
 
   useEffect(() => {
     const fetchContactNumber = async () => {
       try {
-        const res = await axios.get(
-          `${import.meta.env.VITE_API_URL}/contact-info/api`
-        );
-
-        const phone = res.data?.data?.phone || "";
-
-        if (phone) {
-          setContactPhone(String(phone));
-        }
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/contact-info/api`);
+        const phone = response.data?.data?.phone || "";
+        if (phone) setContactPhone(String(phone));
       } catch (error) {
         console.error("Failed to fetch contact number:", error);
       }
     };
-
-    fetchContactNumber();
+    if (open) fetchContactNumber();
   }, [open]);
 
-  const onUpdateQuantity = (item, delta) => {
-    const newQty = Math.max(1, item.quantity + delta);
+  const normalizedItems = useMemo(() => {
+    const map = new Map<string, CartItem>();
+    items.forEach((item) => {
+      const variantKey = item.variantId ?? getPackageLabel(item);
+      const key = `${item.productId ?? item.id}_${variantKey}`;
+      const existing = map.get(key);
+      if (existing) existing.quantity += Number(item.quantity || 0);
+      else map.set(key, { ...item });
+    });
+    return Array.from(map.values());
+  }, [items]);
+
+  const subtotal = normalizedItems.reduce(
+    (sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 0),
+    0
+  );
+  const totalItems = normalizedItems.reduce(
+    (sum, item) => sum + Number(item.quantity || 0),
+    0
+  );
+  const totalCartWeightKg = normalizedItems.reduce(
+    (sum, item) => sum + getItemWeightKg(item) * Number(item.quantity || 0),
+    0
+  );
+
+  const onUpdateQuantity = (item: CartItem, delta: number) => {
+    const currentQty = Number(item.quantity || 1);
+    const stock = Number(item.stock ?? 0);
+    const newQty = Math.max(1, currentQty + delta);
+
+    if (delta > 0 && newQty > stock) {
+      toast.error(`Only ${stock} available for this pack`);
+      return;
+    }
 
     const updated = updateCartQty(
       item.productId,
-      item.package,
+      getPackageLabel(item),
       newQty
     );
-
-    setIsDirty(true); // ✅ mark dirty
-    setItems(updated);
-
+    setItems(updated as CartItem[]);
     window.dispatchEvent(new Event("cartUpdated"));
   };
 
-  // const saveCartChanges = async () => {
-  //   const userId = localStorage.getItem("syaraid");
-
-  //   console.log("clikced")
-  //   if (!userId || !isDirty) return;
-
-  //   try {
-  //     setSaving(true);
-  //     const payload = localItems.map((item) => ({
-  //       productId: item.id || item.productId,
-  //       quantity: item.quantity,
-  //       package: item.package,
-  //     }));
-
-  //     await axios.put(
-  //       `${import.meta.env.VITE_API_URL}/update-cart-inbulk/${userId}`,
-  //       { items: payload }
-  //     );
-
-  //     setIsDirty(false);
-
-  //   } catch (err) {
-  //     console.error("Bulk update failed", err);
-  //     toast.error("Something went wrong. Please try again.");
-  //   }
-  //   finally {
-  //     setSaving(false); // ✅ STOP LOADING
-  //   }
-  // };
-
-  const onRemove = (item) => {
-    const updated = removeFromCart(item.productId, item.package);
-    setItems(updated);
-
-    setIsDirty(true); // ✅ mark dirty
+  const onRemove = (item: CartItem) => {
+    const updated = removeFromCart(item.productId, getPackageLabel(item));
+    setItems(updated as CartItem[]);
     window.dispatchEvent(new Event("cartUpdated"));
-
-
+    toast.success("Item removed from cart");
   };
 
   const proceed = async () => {
@@ -191,188 +153,123 @@ const CartDrawer = ({ open, onClose,
     }
 
     const userId = localStorage.getItem("syaraid");
-
-    const cart = getCart();
-
+    const currentCart = getCart() as CartItem[];
     onClose();
+
+    if (userId) {
+      try {
+        setSaving(true);
+        await dispatch(syncCartAPI({ userId, items: currentCart }) as any);
+      } catch (error) {
+        console.error("Cart sync failed:", error);
+      } finally {
+        setSaving(false);
+      }
+    }
 
     navigate("/checkout");
-
-    if (userId) {
-      console.log("Syncing cart with server...", items);
-      dispatch(syncCartAPI({ userId, items }));
-      setIsDirty(false);
-    }
   };
 
-  console.log("Cart Items:", items);
-
-  const loggedin = localStorage.getItem('syaraid')
-
-  const handleClose = () => {
-    const userId = localStorage.getItem("syaraid");
-
-    // ✅ Instant UI close
-    onClose();
-
-    // ✅ Fire & forget API (no await, no loader)
-    if (userId) {
-      console.log("Syncing cart with server...", items);
-      dispatch(syncCartAPI({ userId, items }));
-      setIsDirty(false);
-    }
-  };
+  const loggedin = Boolean(localStorage.getItem("syaraid"));
 
   return (
     <>
-      {/* Overlay */}
-      <div
-        className={`cd-overlay ${open ? "open" : ""}`}
-        onClick={() => handleClose()}
-      />
+      <div className={`cd-overlay ${open ? "open" : ""}`} onClick={onClose} />
 
       {saving && (
         <div className="cart-saving-overlay">
-          <div className="cart-loader"></div>
+          <div className="cart-loader" />
           <p>Saving cart...</p>
         </div>
       )}
 
-      {/* Drawer */}
-      <div className={`cd-drawer ${open ? "open" : ""}`}>
-
-        {/* Header */}
+      <div className={`cd-drawer ${open ? "open" : ""}`} aria-hidden={!open}>
         <div className="cd-header">
-          <h2>
-            Your Cart
-          </h2>
-          <button onClick={handleClose} className="cd-close">
+          <h2>Your Cart <span className="cd-item-count">({totalItems})</span></h2>
+          <button type="button" onClick={onClose} className="cd-close" aria-label="Close cart">
             <X size={20} />
           </button>
         </div>
 
-        {/* Body */}
         <div className="cd-body">
-          {false ? (
-            // 🔥 Skeleton Loader
-            Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="cd-item skeleton">
-                <div className="skeleton-img"></div>
-
-                <div className="cd-item-info">
-                  <div className="skeleton-text title"></div>
-                  <div className="skeleton-text price"></div>
-
-                  <div className="cd-qty">
-                    <div className="skeleton-btn"></div>
-                    <div className="skeleton-count"></div>
-                    <div className="skeleton-btn"></div>
-                  </div>
-                </div>
-
-                <div className="skeleton-remove"></div>
-              </div>
-            ))
-          ) : items?.length === 0 ? (
+          {normalizedItems.length === 0 ? (
             <p className="cd-empty">Your cart is empty</p>
           ) : (
-            items?.map((item) => {
-              const id = item.id || item.productId;
-
-              // console.log(item)
-              // const package = item.package || item.pack ;
-
-              const displayPrice =
-                item.package === "1kg"
-                  ? item.Pack1kgprice || item.price
-                  : item.package === "500gm"
-                    ? item.Pack500gprice || item.price
-                    : item.price;
-
-              const normalizeItem = (item) => ({
-                ...item,
-                package: item.package || item.pack,
-                productName: item.productName || item.name,
-              });
+            normalizedItems.map((item) => {
+              const key = `${item.productId ?? item.id}-${item.variantId ?? getPackageLabel(item)}`;
+              const stock = Number(item.stock ?? 0);
+              const itemPrice = Number(item.price ?? 0);
+              const label = getPackageLabel(item);
 
               return (
-                <div key={id} className="cd-item">
-
-                  <img style={{ cursor: 'pointer' }} onClick={() => { onClose(); navigate(`/product/${item.slug}`); }} src={`${import.meta.env.VITE_API_URL}/public/userImages/${item.image}`} alt={item.name} />
+                <div key={key} className="cd-item">
+                  <img
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                      onClose();
+                      if (item.slug) navigate(`/product/${item.slug}`);
+                    }}
+                    src={`${import.meta.env.VITE_API_URL}/public/userImages/${item.image || ""}`}
+                    alt={item.productName || item.name || "Product"}
+                  />
 
                   <div className="cd-item-info">
-                    <h3>{normalizeItem(item).productName}</h3>
-                    <p className="cd-package">
-                      {normalizeItem(item).package === "1kg" ? item.is_liquid ? "1L Pack" : "1Kg Pack" : item.is_liquid ? "500ML Pack" : "500G Pack"}
-                    </p>
-
-                    {/* ✅ PRICE */}
-                    <p className="cd-price">₹{displayPrice?.toFixed(2)}</p>
+                    <h3>{item.productName || item.name || "Product"}</h3>
+                    <p className="cd-package">{label}</p>
+                    <p className="cd-price">₹{itemPrice.toFixed(2)}</p>
                     <div className="cd-qty">
-                      <button onClick={() => onUpdateQuantity(item, -1)}>
+                      <button
+                        type="button"
+                        aria-label="Decrease quantity"
+                        onClick={() => onUpdateQuantity(item, -1)}
+                        disabled={Number(item.quantity) <= 1}
+                      >
                         <Minus size={14} />
                       </button>
-
                       <span>{item.quantity}</span>
-
                       <button
-                        onClick={() => {
-                          if (item.quantity < item?.stock) {
-                            onUpdateQuantity(item, 1)
-                          }
-                        }}
-                        disabled={item.quantity >= item?.stock}
+                        type="button"
+                        aria-label="Increase quantity"
+                        onClick={() => onUpdateQuantity(item, 1)}
+                        disabled={stock <= 0 || Number(item.quantity) >= stock}
                       >
                         <Plus size={14} />
                       </button>
-
-
                     </div>
+                    {stock <= 0 && <p className="cd-stock-warning">Currently out of stock</p>}
                   </div>
 
                   <button
+                    type="button"
                     onClick={() => onRemove(item)}
                     className="cd-remove"
-                    disabled={removingId === id}
+                    aria-label={`Remove ${item.productName || item.name || "product"}`}
                   >
-                    {/* {removingId === id ? (
-                      <span className="modern-loader" style={{width:'18px', height:'18px', borderRadius:"50%", borderColor:'rgba(0,0,0,0.1)', borderWidth:'2px',borderTopColor:'#ec1e24'}}></span>
-                    ) : (
-                      <Trash2 size={16} />
-                    )} */}
                     <Trash2 size={16} />
                   </button>
                 </div>
-              )
+              );
             })
           )}
         </div>
 
-        {/* Footer */}
-        {items.length > 0 && (
+        {normalizedItems.length > 0 && (
           <div className="cd-footer">
-
             <div className="cd-subtotal">
               <span>Subtotal</span>
               <span>₹{subtotal.toFixed(2)}</span>
             </div>
-
-            <p className="cd-note">
-              Shipping calculated at checkout
-            </p>
-
+            <p className="cd-note">Shipping calculated at checkout</p>
             <button
+              type="button"
               className="cd-checkout"
               onClick={() => {
                 if (totalCartWeightKg > 20) {
                   setBulkOrderOpen(true);
-                  return;
-                }
-
-                if (loggedin) {
-                  proceed();
+                } else if (loggedin) {
+                  void proceed();
                 } else {
-                  setAuthOpen(true)// 🔥 open login popup
+                  setAuthOpen(true);
                 }
               }}
             >
@@ -380,80 +277,29 @@ const CartDrawer = ({ open, onClose,
             </button>
           </div>
         )}
-
       </div>
 
       {bulkOrderOpen && (
-        <div
-          onClick={() => setBulkOrderOpen(false)}
-          style={{
-            position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            zIndex: 9999, padding: "20px"
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              width: "100%", maxWidth: "430px", background: "#fff",
-              borderRadius: "16px", padding: "28px 24px", textAlign: "center",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.25)"
-            }}
-          >
-            <div style={{
-              width: "58px", height: "58px", margin: "0 auto 16px",
-              borderRadius: "50%", background: "#fff3e0", color: "#e65100",
-              display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: "28px", fontWeight: 700
-            }}>!</div>
-
-            <h3 style={{ margin: "0 0 10px", fontSize: "21px", color: "#222" }}>
-              Bulk Order
-            </h3>
-
-            <p style={{ margin: "0 auto 8px", color: "#555", lineHeight: 1.5, fontSize: "15px" }}>
-              Your cart weight is <strong>{totalCartWeightKg.toFixed(2)} kg</strong>,
-              which is above our 20 kg checkout limit.
+        <div className="cd-bulk-overlay" onClick={() => setBulkOrderOpen(false)}>
+          <div className="cd-bulk-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="cd-bulk-icon">!</div>
+            <h3>Bulk Order</h3>
+            <p>
+              Your cart weight is <strong>{totalCartWeightKg.toFixed(2)} kg</strong>, which is above
+              our 20 kg checkout limit.
             </p>
-
-            <p style={{ margin: "0 auto 22px", color: "#555", lineHeight: 1.5, fontSize: "15px" }}>
-              For bulk orders above 20 kg, please contact us to place your order.
-            </p>
-
-            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
-              <button
-                type="button"
-                onClick={() => setBulkOrderOpen(false)}
-                style={{
-                  flex: 1, padding: "12px 16px", border: "1px solid #ddd",
-                  borderRadius: "9px", background: "#fff", color: "#333",
-                  cursor: "pointer", fontWeight: 600
-                }}
-              >
-                Close
-              </button>
-
+            <p>For bulk orders above 20 kg, please contact us to place your order.</p>
+            <div className="cd-bulk-actions">
+              <button type="button" onClick={() => setBulkOrderOpen(false)}>Close</button>
               <a
                 href={contactPhone ? `tel:${contactPhone}` : undefined}
-                onClick={(e) => { if (!contactPhone) e.preventDefault(); }}
-                style={{
-                  flex: 1, padding: "12px 16px", borderRadius: "9px",
-                  background: contactPhone ? "#307533" : "#aaa", color: "#fff",
-                  textDecoration: "none", cursor: contactPhone ? "pointer" : "not-allowed",
-                  fontWeight: 600, display: "flex", alignItems: "center",
-                  justifyContent: "center", gap: "7px"
-                }}
+                onClick={(event) => { if (!contactPhone) event.preventDefault(); }}
+                className={contactPhone ? "enabled" : "disabled"}
               >
-                <PhoneCall size={17} />
-                Call Us
+                <PhoneCall size={17} /> Call Us
               </a>
             </div>
-
-            {!contactPhone && (
-              <p style={{ margin: "12px 0 0", color: "#999", fontSize: "12px" }}>
-                Contact number is currently unavailable.
-              </p>
-            )}
+            {!contactPhone && <p className="cd-contact-unavailable">Contact number is currently unavailable.</p>}
           </div>
         </div>
       )}

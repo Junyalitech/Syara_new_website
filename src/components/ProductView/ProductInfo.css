@@ -439,3 +439,99 @@
   opacity: 0.3;
   cursor: not-allowed;
 }
+
+/* Dynamic product variants */
+.product-info {
+  min-width: 0;
+}
+
+.price-box .new-price {
+  color: #2e7d32;
+}
+
+.stock-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 9px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.stock-status.in {
+  color: #237a35;
+  background: #edf8ef;
+}
+
+.stock-status.out {
+  color: #c62828;
+  background: #fff0f0;
+}
+
+.package-select > p {
+  margin: 0 0 8px;
+  font-weight: 600;
+}
+
+.pack-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+}
+
+.pack-options button {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid #d8dee5;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  transition: border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.pack-options button.active {
+  border-color: #4caf50;
+  background: #f0f9f1;
+  color: #287b35;
+  box-shadow: 0 0 0 1px rgba(76, 175, 80, .12);
+}
+
+.pack-options button.variant-out-of-stock {
+  color: #777;
+  background: #fafafa;
+}
+
+.pack-options .variant-price {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pack-options .variant-unavailable {
+  font-size: 11px;
+  color: #c62828;
+}
+
+.no-variants-message {
+  margin: 8px 0;
+  color: #c62828;
+  font-size: 13px;
+}
+
+.cart-section .add-cart:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+@media (max-width: 600px) {
+  .pack-options button {
+    flex: 1 1 auto;
+    min-width: 100px;
+  }
+}
