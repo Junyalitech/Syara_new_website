@@ -49,9 +49,9 @@ const Sidebar = ({ filters, setFilters, isMobile = false }) => {
             Category
           </button>
 
-          <button className="mobile-filter-button" onClick={() => setActiveFilter("price")}>
+          {/* <button className="mobile-filter-button" onClick={() => setActiveFilter("price")}>
             Price
-          </button>
+          </button> */}
 
 
 
@@ -155,7 +155,7 @@ const Sidebar = ({ filters, setFilters, isMobile = false }) => {
           </div>
 
           {/* PRICE */}
-          <div className="filter-section">
+          {/* <div className="filter-section">
             {!isMobile && <h4>Price</h4>}
             {priceRanges.map((p) => (
               <label
@@ -172,7 +172,7 @@ const Sidebar = ({ filters, setFilters, isMobile = false }) => {
                 {p.label}
               </label>
             ))}
-          </div>
+          </div> */}
 
 
 
