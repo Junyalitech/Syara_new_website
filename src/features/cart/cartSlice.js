@@ -23,9 +23,12 @@ export const syncCartAPI = createAsyncThunk(
     try {
       await axios.put(`${API}/update-cart-inbulk/${localStorage.getItem("syaraid")}`, {
         items: items.map((item) => ({
-          productId: item.productId || null,
-          quantity: item.quantity || null,
-          package: item.package || null,
+          productId: item.productId ?? item.id ?? null,
+          variantId: item.variantId ?? null,
+          quantity: item.quantity ?? null,
+          package: item.package ?? null,
+          price: item.price ?? null,
+          stock: item.stock ?? null,
         })),
       });
       return true;
@@ -62,16 +65,18 @@ const cartSlice = createSlice({
       const {
         productId,
         quantity,
+        variantId,
         package: pkg,
         price,
         productName,
         image,
-        Pack1kgprice,
-        Pack500gprice,
+        stock,
       } = action.payload;
 
       const existing = state.items.find(
-        (i) => i.id === productId && i.package === pkg
+        (i) =>
+          Number(i.id ?? i.productId) === Number(productId) &&
+          String(i.variantId ?? i.package) === String(variantId ?? pkg)
       );
 
       if (existing) {
@@ -79,23 +84,26 @@ const cartSlice = createSlice({
       } else {
         state.items.push({
           id: productId,
+          productId,
+          variantId,
           quantity,
           package: pkg,
           price,
           productName,
           image,
-          Pack1kgprice,   // ✅ ADD THIS
-          Pack500gprice,  // ✅ ADD THIS
+          stock
         });
       }
     },
 
     // 🔥 UPDATE QTY
     updateQty: (state, action) => {
-      const { productId, package: pkg, quantity } = action.payload;
+      const { productId, variantId, package: pkg, quantity } = action.payload;
 
       const item = state.items.find(
-        (i) => i.id === productId && i.package === pkg
+        (i) =>
+          Number(i.id ?? i.productId) === Number(productId) &&
+          String(i.variantId ?? i.package) === String(variantId ?? pkg)
       );
 
       if (item) item.quantity = quantity;
@@ -103,10 +111,14 @@ const cartSlice = createSlice({
 
     // 🔥 REMOVE ITEM
     removeItem: (state, action) => {
-      const { productId, package: pkg } = action.payload;
+      const { productId, variantId, package: pkg } = action.payload;
 
       state.items = state.items.filter(
-        (i) => !(i.id === productId && i.package === pkg)
+        (i) =>
+          !(
+            Number(i.id ?? i.productId) === Number(productId) &&
+            String(i.variantId ?? i.package) === String(variantId ?? pkg)
+          )
       );
     },
 
@@ -125,6 +137,18 @@ const cartSlice = createSlice({
       .addCase(fetchUserCart.pending, (state) => {
         state.loading = true;
       })
+      .addCase(fetchUserCart.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(syncCartAPI.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(syncCartAPI.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(syncCartAPI.rejected, (state) => {
+        state.loading = false;
+      })
       .addCase(fetchUserCart.fulfilled, (state, action) => {
         const cart = action.payload;
         state.loading = false;
@@ -133,13 +157,14 @@ const cartSlice = createSlice({
         state.items =
           cart?.products?.map((p) => ({
             id: p.productId || p.id,
-            quantity: p.quantity || p.qty,
+            productId: p.productId || p.id,
+            variantId: p.variantId ?? null,
+            quantity: p.quantity ?? p.qty ?? 1,
             productName: p.productName,
             price: p.price,
             package: p.package,
             image: p.image,
-            Pack1kgprice: p.Pack1kgprice,
-            Pack500gprice: p.Pack500gprice,
+            stock: p.stock,
           })) || [];
       });
   },

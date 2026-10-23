@@ -10,13 +10,13 @@ export const fetchUserCartAPI = async ({ userId }) => {
   console.log("Fetched cart from server:", products);
   return products.map((p) => ({
     productId: p.productId,
+    variantId: p.variantId ?? null,
     quantity: p.quantity,
     package: p.package,
     productName: p.productName,
     price: p.price,
     image: p.image,
-    Pack1kgprice: p.Pack1kgprice,
-    Pack500gprice: p.Pack500gprice,
+    stock: p.stock,
   }));
 };
 
@@ -39,8 +39,8 @@ export const addToCart = (item) => {
 
   const existingIndex = cart.findIndex(
     (i) =>
-      Number(i.productId) === Number(item.productId) &&
-      i.package === item.package
+      Number(i.productId ?? i.id) === Number(item.productId ?? item.id) &&
+      String(i.variantId ?? i.package) === String(item.variantId ?? item.package)
   );
 
   if (existingIndex !== -1) {
@@ -82,7 +82,8 @@ export const updateCartQty = (productId, packageType, quantity) => {
   let cart = getCart();
 
   cart = cart.map((item) =>
-    item.productId === productId && item.package === packageType
+    Number(item.productId ?? item.id) === Number(productId) &&
+    String(item.variantId ?? item.package) === String(packageType)
       ? { ...item, quantity }
       : item
   );
@@ -96,7 +97,10 @@ export const removeFromCart = (productId, packageType) => {
 
   cart = cart.filter(
     (item) =>
-      !(item.productId === productId && item.package === packageType)
+      !(
+        Number(item.productId ?? item.id) === Number(productId) &&
+        String(item.variantId ?? item.package) === String(packageType)
+      )
   );
 
   saveCart(cart);
