@@ -35,74 +35,66 @@ export const saveCart = (cart) => {
 };
 
 export const addToCart = (item) => {
-  let cart = getCart();
+  const cart = getCart();
+
+  const productId = item.productId ?? item.id;
+  const packageLabel = String(item.package ?? item.pack ?? "");
 
   const existingIndex = cart.findIndex(
-    (i) =>
-      Number(i.productId ?? i.id) === Number(item.productId ?? item.id) &&
-      String(i.variantId ?? i.package) === String(item.variantId ?? item.package)
+    (existing) =>
+      Number(existing.productId ?? existing.id) === Number(productId) &&
+      String(existing.package ?? existing.pack ?? "") === packageLabel
   );
 
   if (existingIndex !== -1) {
     const existingItem = cart[existingIndex];
 
-    // Same product + same package + same quantity
     if (Number(existingItem.quantity) === Number(item.quantity)) {
       return { error: "Product already in cart" };
     }
 
-    // Same product + same package but different quantity
     cart[existingIndex] = {
       ...existingItem,
-      quantity: item.quantity,
-      price: item.price,
+      ...item,
+      productId,
+      package: packageLabel,
     };
 
     saveCart(cart);
-
-    return {
-      success: true,
-      updated: true,
-      cart,
-    };
+    return { success: true, updated: true, cart };
   }
 
-  // New product/package
-  cart.push(item);
+  cart.push({ ...item, productId, package: packageLabel });
   saveCart(cart);
 
-  return {
-    success: true,
-    updated: false,
-    cart,
-  };
+  return { success: true, updated: false, cart };
 };
 
-export const updateCartQty = (productId, packageType, quantity) => {
-  let cart = getCart();
+export const updateCartQty = (productId, packageLabel, quantity) => {
+  const cart = getCart();
 
-  cart = cart.map((item) =>
+  const updated = cart.map((item) =>
     Number(item.productId ?? item.id) === Number(productId) &&
-    String(item.variantId ?? item.package) === String(packageType)
-      ? { ...item, quantity }
+    String(item.package ?? item.pack ?? "") === String(packageLabel)
+      ? { ...item, quantity: Number(quantity) }
       : item
   );
 
-  saveCart(cart);
-  return cart;
+  saveCart(updated);
+  return updated;
 };
 
-export const removeFromCart = (productId, packageType) => {
-  let cart = getCart();
+export const removeFromCart = (productId, packageLabel) => {
+  const cart = getCart();
 
-  cart = cart.filter(
+  const updated = cart.filter(
     (item) =>
       !(
         Number(item.productId ?? item.id) === Number(productId) &&
-        String(item.variantId ?? item.package) === String(packageType)
+        String(item.package ?? item.pack ?? "") === String(packageLabel)
       )
   );
 
-  saveCart(cart);
-  return cart;
+  saveCart(updated);
+  return updated;
 };

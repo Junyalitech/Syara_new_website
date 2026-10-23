@@ -131,7 +131,7 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
     }
 
     const updated = updateCartQty(
-      item.productId,
+      item.productId ?? item.id,
       getPackageLabel(item),
       newQty
     );
@@ -140,7 +140,10 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
   };
 
   const onRemove = (item: CartItem) => {
-    const updated = removeFromCart(item.productId, getPackageLabel(item));
+    const updated = removeFromCart(
+      item.productId ?? item.id,
+      getPackageLabel(item)
+    );
     setItems(updated as CartItem[]);
     window.dispatchEvent(new Event("cartUpdated"));
     toast.success("Item removed from cart");
