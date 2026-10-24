@@ -5,7 +5,7 @@ const API = import.meta.env.VITE_API_URL; // adjust as needed
 export const fetchUserCartAPI = async ({ userId }) => {
   const res = await axios.get(`${API}/user/${userId}`);
 
-  const products = res.data?.[0]?.products || [];
+  const products = res.data?.[0]?.products || res.data?.products || res.data?.data?.products || [];
 
   console.log("Fetched cart from server:", products);
   return products.map((p) => ({
@@ -14,9 +14,15 @@ export const fetchUserCartAPI = async ({ userId }) => {
     quantity: p.quantity,
     package: p.package,
     productName: p.productName,
-    price: p.price,
+    price: p.sellingPrice ?? p.price ?? p.mrp ?? 0,
+    sellingPrice: p.sellingPrice ?? p.price ?? 0,
+    mrp: p.mrp ?? p.price ?? 0,
     image: p.image,
     stock: p.stock,
+    slug: p.slug,
+    is_liquid: p.is_liquid,
+    unit: p.unit,
+    variantQuantity: p.variantQuantity,
   }));
 };
 

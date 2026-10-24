@@ -32,7 +32,7 @@ const AdditionalInfo = ({ product }: any) => {
           <tr>
             <td>Recipe</td>
             <td>
-              <a href={product.recipe} target="_blank">
+              <a href={product.recipe} target="_blank" rel="noopener noreferrer">
                 View Recipe
               </a>
             </td>
@@ -43,7 +43,7 @@ const AdditionalInfo = ({ product }: any) => {
           <tr>
             <td>Video</td>
             <td>
-              <a href={product.video} target="_blank">
+              <a href={product.video} target="_blank" rel="noopener noreferrer">
                 Watch Video
               </a>
             </td>
@@ -92,6 +92,9 @@ const ProductTabs = ({ product, loading }: any) => {
         {tabs.map((tab, i) => (
           <button
             key={tab}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === i}
             onClick={() => setActiveTab(i)}
             className={`pt-tab ${activeTab === i ? "active" : ""}`}
           >

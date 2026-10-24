@@ -26,6 +26,9 @@ type CartItem = {
   weight?: number | string;
   weightKg?: number | string;
   slug?: string;
+  mrp?: number | string;
+  sellingPrice?: number | string;
+  variantQuantity?: number | string;
 };
 
 interface CartDrawerProps {
@@ -98,8 +101,8 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
   const normalizedItems = useMemo(() => {
     const map = new Map<string, CartItem>();
     items.forEach((item) => {
-      const variantKey = item.variantId ?? getPackageLabel(item);
-      const key = `${item.productId ?? item.id}_${variantKey}`;
+      const packageKey = getPackageLabel(item).trim().toLowerCase();
+      const key = `${item.productId ?? item.id}_${packageKey}`;
       const existing = map.get(key);
       if (existing) existing.quantity += Number(item.quantity || 0);
       else map.set(key, { ...item });
@@ -122,10 +125,11 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
 
   const onUpdateQuantity = (item: CartItem, delta: number) => {
     const currentQty = Number(item.quantity || 1);
-    const stock = Number(item.stock ?? 0);
+    const stockKnown = item.stock !== undefined && item.stock !== null && item.stock !== "";
+    const stock = stockKnown ? Number(item.stock) : null;
     const newQty = Math.max(1, currentQty + delta);
 
-    if (delta > 0 && newQty > stock) {
+    if (delta > 0 && stock !== null && newQty > stock) {
       toast.error(`Only ${stock} available for this pack`);
       return;
     }
@@ -175,9 +179,24 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
 
   const loggedin = Boolean(localStorage.getItem("syaraid"));
 
+  // Start syncing the latest local cart whenever the drawer is closed.
+  // Do not await here: closing the drawer should remain instant.
+  const handleClose = () => {
+    const userId = localStorage.getItem("syaraid");
+    const currentCart = getCart() as CartItem[];
+
+    if (userId) {
+      void dispatch(syncCartAPI({ userId, items: currentCart }) as any).catch((error: unknown) => {
+        console.error("Background cart sync failed:", error);
+      });
+    }
+
+    onClose();
+  };
+
   return (
     <>
-      <div className={`cd-overlay ${open ? "open" : ""}`} onClick={onClose} />
+      <div className={`cd-overlay ${open ? "open" : ""}`} onClick={handleClose} />
 
       {saving && (
         <div className="cart-saving-overlay">
@@ -189,7 +208,7 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
       <div className={`cd-drawer ${open ? "open" : ""}`} aria-hidden={!open}>
         <div className="cd-header">
           <h2>Your Cart <span className="cd-item-count">({totalItems})</span></h2>
-          <button type="button" onClick={onClose} className="cd-close" aria-label="Close cart">
+          <button type="button" onClick={handleClose} className="cd-close" aria-label="Close cart">
             <X size={20} />
           </button>
         </div>
@@ -199,9 +218,10 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
             <p className="cd-empty">Your cart is empty</p>
           ) : (
             normalizedItems.map((item) => {
-              const key = `${item.productId ?? item.id}-${item.variantId ?? getPackageLabel(item)}`;
-              const stock = Number(item.stock ?? 0);
-              const itemPrice = Number(item.price ?? 0);
+              const key = `${item.productId ?? item.id}-${getPackageLabel(item).trim().toLowerCase()}`;
+              const stockKnown = item.stock !== undefined && item.stock !== null && item.stock !== "";
+              const stock = stockKnown ? Number(item.stock) : null;
+              const itemPrice = Number(item.sellingPrice ?? item.price ?? 0);
               const label = getPackageLabel(item);
 
               return (
@@ -209,7 +229,7 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
                   <img
                     style={{ cursor: "pointer" }}
                     onClick={() => {
-                      onClose();
+                      handleClose();
                       if (item.slug) navigate(`/product/${item.slug}`);
                     }}
                     src={`${import.meta.env.VITE_API_URL}/public/userImages/${item.image || ""}`}
@@ -234,12 +254,12 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
                         type="button"
                         aria-label="Increase quantity"
                         onClick={() => onUpdateQuantity(item, 1)}
-                        disabled={stock <= 0 || Number(item.quantity) >= stock}
+                        disabled={stock !== null && (stock <= 0 || Number(item.quantity) >= stock)}
                       >
                         <Plus size={14} />
                       </button>
                     </div>
-                    {stock <= 0 && <p className="cd-stock-warning">Currently out of stock</p>}
+                    {stock !== null && stock <= 0 && <p className="cd-stock-warning">Currently out of stock</p>}
                   </div>
 
                   <button

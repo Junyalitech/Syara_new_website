@@ -9,7 +9,10 @@ type Variant = {
   id: number | string;
   quantity: number | string;
   unit: string;
+  /** MRP / original price */
   price: number | string;
+  /** Optional discounted selling price; falls back to MRP when absent or blank. */
+  sellingPrice?: number | string | null;
   stock: number | string;
   status?: string;
 };
@@ -58,7 +61,17 @@ const ProductInfo = ({ product, loading }: any) => {
   const selectedVariant =
     variants.find((variant) => String(variant.id) === selectedVariantId) ||
     variants[0];
-  const price = Number(selectedVariant?.price ?? 0);
+  const mrp = Number(selectedVariant?.price ?? 0);
+  const sellingPriceValue = selectedVariant?.sellingPrice;
+  const parsedSellingPrice = sellingPriceValue == null || String(sellingPriceValue).trim() === ""
+    ? mrp
+    : Number(sellingPriceValue);
+  // Guard against malformed/legacy values and never show a selling price above MRP.
+  const price = Number.isFinite(parsedSellingPrice) && parsedSellingPrice > 0
+    ? Math.min(parsedSellingPrice, mrp > 0 ? mrp : parsedSellingPrice)
+    : mrp;
+  const hasDiscount = Boolean(selectedVariant && mrp > price);
+  const formatPrice = (value: number) => `₹${value.toFixed(2)}`;
   const stock = Number(selectedVariant?.stock ?? 0);
   const outOfStock = !selectedVariant || stock <= 0;
 
@@ -138,8 +151,18 @@ const ProductInfo = ({ product, loading }: any) => {
 
       <div className="price-box">
         <span className="new-price">
-          {selectedVariant ? `₹${price.toFixed(2)}` : "Price unavailable"}
+          {selectedVariant ? formatPrice(price) : "Price unavailable"}
         </span>
+        {selectedVariant && hasDiscount && (
+          <>
+            <span className="old-price" aria-label={`MRP ${formatPrice(mrp)}`}>
+              {formatPrice(mrp)}
+            </span>
+            <span className="product-discount-badge">
+              {Math.round(((mrp - price) / mrp) * 100)}% OFF
+            </span>
+          </>
+        )}
       </div>
 
       <div className="stock">
@@ -170,7 +193,28 @@ const ProductInfo = ({ product, loading }: any) => {
                   onClick={() => selectVariant(variant)}
                 >
                   <span>{getVariantLabel(variant)}</span>
-                  <span className="variant-price">₹{Number(variant.price ?? 0).toFixed(2)}</span>
+                  <span className="variant-price">
+                    {(() => {
+                      const variantMrp = Number(variant.price ?? 0);
+                      const rawSellingPrice = variant.sellingPrice;
+                      const parsed = rawSellingPrice == null || String(rawSellingPrice).trim() === ""
+                        ? variantMrp
+                        : Number(rawSellingPrice);
+                      const variantSellingPrice = Number.isFinite(parsed) && parsed > 0
+                        ? Math.min(parsed, variantMrp > 0 ? variantMrp : parsed)
+                        : variantMrp;
+                      return (
+                        <>
+                          <span className="variant-selling-price">{formatPrice(variantSellingPrice)}</span>
+                          {variantMrp > variantSellingPrice && (
+                            <span className="variant-old-price" aria-label={`MRP ${formatPrice(variantMrp)}`}>
+                              {formatPrice(variantMrp)}
+                            </span>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </span>
                   {variantStock <= 0 && <span className="variant-unavailable">Out of stock</span>}
                 </button>
               );

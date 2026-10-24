@@ -388,3 +388,201 @@
 .gm-pack-options .pack-option {
   min-height: 34px;
 }
+
+
+/* Product-card refresh: consistent image area, clearer pricing and pack selection. */
+.gm-product-card {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 100%;
+  max-height: none;
+  padding: 16px;
+  border-color: #e8ebef;
+  border-radius: 16px;
+  gap: 0;
+}
+
+.gm-product-card:hover {
+  border-color: #d7e7d8;
+  box-shadow: 0 12px 28px rgba(23, 43, 30, 0.10);
+}
+
+.gm-product-image-wrapper {
+  width: 100%;
+  height: 178px;
+  min-height: 178px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.gm-product-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 178px;
+  object-fit: contain;
+  margin: 0;
+}
+
+.gm-product-name {
+  color: #202833;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 650;
+  min-height: 44px;
+  margin: 2px 0 8px;
+}
+
+.gm-product-prices {
+  min-height: 32px;
+  margin: 2px 0 10px;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.gm-product-price {
+  color: #218238;
+  font-size: 20px;
+  font-weight: 750;
+  letter-spacing: -0.25px;
+}
+
+.gm-product-old-price {
+  color: #89919b;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.gm-card-discount {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 8px;
+  color: #176b2a;
+  background: #e8f6eb;
+  border: 1px solid #d2ebd7;
+  border-radius: 7px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.gm-pack-options {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  gap: 7px;
+  margin: 8px 0 5px;
+}
+
+.gm-pack-options .pack-option {
+  position: relative;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 38px;
+  flex: 0 1 auto;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 1px solid #d6dce4;
+  border-radius: 10px;
+  background: #fff;
+  color: #374151;
+  font-size: 12px;
+  line-height: 1.2;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+
+.gm-pack-options .pack-option:hover {
+  border-color: #77b981;
+}
+
+.gm-pack-options .pack-option.active {
+  color: #216f31;
+  border: 1.5px solid #2e8b42;
+  background: #edf8ef;
+  box-shadow: inset 0 0 0 1px rgba(46, 139, 66, .06);
+  font-weight: 700;
+}
+
+/* Explicitly restore native radio rendering to defeat broad site CSS resets. */
+.gm-pack-options .pack-option input[type="radio"] {
+  appearance: auto !important;
+  -webkit-appearance: radio !important;
+  display: inline-block !important;
+  position: static !important;
+  flex: 0 0 15px;
+  width: 15px !important;
+  min-width: 15px;
+  height: 15px !important;
+  min-height: 15px;
+  margin: 0 !important;
+  padding: 0 !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  accent-color: #27833a;
+  cursor: pointer;
+  transform: none !important;
+}
+
+.gm-pack-options .pack-option input[type="radio"]:checked {
+  accent-color: #27833a;
+}
+
+.gm-pack-options .pack-option:focus-within {
+  outline: 2px solid rgba(46, 139, 66, .28);
+  outline-offset: 2px;
+}
+
+.gm-pack-options .pack-option.variant-out-of-stock {
+  opacity: .62;
+}
+
+.gm-variant-stock {
+  min-height: 18px;
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.gm-add-cart-btn {
+  min-height: 46px;
+  margin-top: 14px;
+  padding: 11px 14px;
+  font-size: 15px;
+  border-radius: 28px;
+  background: #43ad50;
+}
+
+.gm-add-cart-btn:hover:not(:disabled) {
+  background: #319840;
+  box-shadow: 0 5px 12px rgba(46, 139, 66, .18);
+}
+
+.gm-add-cart-btn:disabled {
+  background: #b9b9b9;
+  color: #fff;
+}
+
+@media (max-width: 600px) {
+  .gm-product-card { padding: 12px; border-radius: 13px; }
+  .gm-product-image-wrapper { height: 145px; min-height: 145px; }
+  .gm-product-image { max-height: 145px; }
+  .gm-product-name { font-size: 14px; min-height: 40px; }
+  .gm-product-price { font-size: 17px; }
+  .gm-pack-options { gap: 5px; }
+  .gm-pack-options .pack-option { padding: 6px 7px; gap: 4px; font-size: 11px; }
+  .gm-pack-options .pack-option input[type="radio"] { width: 14px !important; min-width: 14px; height: 14px !important; }
+}

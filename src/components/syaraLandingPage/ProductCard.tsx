@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Tag } from "lucide-react";
 import "./ProductCard.css";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -16,19 +16,22 @@ const getVariantLabel = (variant) => {
     normalizedUnit === "ml" ? "ml" :
     normalizedUnit === "l" ? "L" :
     normalizedUnit === "pcs" || normalizedUnit === "pc" ? "pcs" : unit;
-  return `${quantity}${displayUnit ? ` ${displayUnit}` : ""}`.trim();
+  return `${quantity}${displayUnit ? ` ${displayUnit}` : ""}`.trim() || "Standard pack";
 };
+
+const money = (value) => Number(value || 0).toLocaleString("en-IN", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
 const ProductCard = ({ product }) => {
   const navigate = useNavigate();
   const { loading } = useSelector((state) => state.cart);
 
-  // Price and stock now belong to variants, not to the product itself.
   const variants = useMemo(
-    () =>
-      (Array.isArray(product?.variants) ? product.variants : []).filter(
-        (variant) => variant && variant.status !== "deactive" && variant.status !== "inactive"
-      ),
+    () => (Array.isArray(product?.variants) ? product.variants : []).filter(
+      (variant) => variant && variant.status !== "deactive" && variant.status !== "inactive"
+    ),
     [product?.variants]
   );
 
@@ -36,32 +39,34 @@ const ProductCard = ({ product }) => {
     variants[0]?.id != null ? String(variants[0].id) : ""
   );
 
+  // Reset selection when the card receives a different product/variant list.
   useEffect(() => {
-    if (!variants.some((variant) => String(variant.id) === selectedVariantId)) {
-      setSelectedVariantId(variants[0]?.id != null ? String(variants[0].id) : "");
-    }
-  }, [variants, selectedVariantId]);
+    setSelectedVariantId(variants[0]?.id != null ? String(variants[0].id) : "");
+  }, [product?.id, variants]);
 
   const selectedVariant =
     variants.find((variant) => String(variant.id) === selectedVariantId) || variants[0];
 
   const stock = Number(selectedVariant?.stock ?? 0);
-  const price = Number(selectedVariant?.price ?? 0);
+  const mrp = Number(selectedVariant?.price ?? 0);
+  // Legacy products without sellingPrice continue to use MRP as their selling price.
+  const sellingPrice = Number(selectedVariant?.sellingPrice ?? selectedVariant?.selling_price ?? mrp);
+  const hasDiscount = mrp > sellingPrice && mrp > 0;
+  const discountPercent = hasDiscount ? Math.round(((mrp - sellingPrice) / mrp) * 100) : 0;
   const outOfStock = !selectedVariant || stock <= 0;
 
   const productview = () => {
+    if (!product?.slug) return;
     navigate(`/product/${product.slug}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const useraddToCartHandler = (event) => {
     event?.stopPropagation();
-
     if (!selectedVariant) {
       toast.error("No product variants are available");
       return;
     }
-
     if (stock <= 0) {
       toast.error("This variant is out of stock");
       return;
@@ -72,7 +77,9 @@ const ProductCard = ({ product }) => {
       variantId: selectedVariant.id,
       quantity: 1,
       package: getVariantLabel(selectedVariant),
-      price,
+      price: sellingPrice,
+      mrp,
+      sellingPrice,
       productName: product.productName,
       image: product.image1,
       stock,
@@ -81,29 +88,26 @@ const ProductCard = ({ product }) => {
     };
 
     const result = addToCart(cartItem);
-
     if (result?.error) {
       toast.error(result.error);
       return;
     }
-
     window.dispatchEvent(new Event("cartUpdated"));
     toast.success("Item added to cart 🛒");
   };
 
   return (
-    <div className="gm-product-card" onClick={productview}>
+    <article className={`gm-product-card ${outOfStock ? "is-out-of-stock" : ""}`} onClick={productview}>
       <div className="gm-product-image-wrapper">
         <img
           src={`${import.meta.env.VITE_API_URL}/public/userImages/${product.image1}`}
-          alt={product.productName}
+          alt={product.productName || "Product"}
           className="gm-product-image"
           loading="lazy"
         />
-        {outOfStock && (
-          <span className="stock-badge out" aria-label="Out of stock">
-            Out of Stock
-          </span>
+        {outOfStock && <span className="stock-badge out" aria-label="Out of stock">Out of Stock</span>}
+        {hasDiscount && !outOfStock && (
+          <span className="gm-card-discount"><Tag size={12} /> {discountPercent}% OFF</span>
         )}
       </div>
 
@@ -111,48 +115,47 @@ const ProductCard = ({ product }) => {
 
       {selectedVariant ? (
         <>
-          <div className="gm-product-prices">
-            <span className="gm-product-price">₹{price.toFixed(2).replace(/\\.00$/, "")}</span>
+          <div className="gm-product-prices" aria-label={`Selling price ₹${sellingPrice}; MRP ₹${mrp}`}>
+            <span className="gm-product-price">₹{money(sellingPrice)}</span>
+            {hasDiscount && <span className="gm-product-old-price">₹{money(mrp)}</span>}
           </div>
 
-          {variants.length >= 1 && (
-            <div
-              className="gm-pack-options"
-              onClick={(event) => event.stopPropagation()}
-              role="group"
-              aria-label={`Choose ${product.productName} variant`}
-            >
-              {variants.map((variant) => {
-                const isSelected = String(variant.id) === String(selectedVariant.id);
-                const variantOutOfStock = Number(variant.stock ?? 0) <= 0;
+          <div
+            className="gm-pack-options"
+            onClick={(event) => event.stopPropagation()}
+            role="radiogroup"
+            aria-label={`Choose pack size for ${product.productName}`}
+          >
+            {variants.map((variant, index) => {
+              const variantId = variant.id != null ? String(variant.id) : `variant-${index}`;
+              const isSelected = variant.id != null
+                ? variantId === selectedVariantId
+                : variant === selectedVariant;
+              const variantOutOfStock = Number(variant.stock ?? 0) <= 0;
 
-                return (
-                  <label
-                    key={variant.id}
-                    className={`pack-option ${isSelected ? "active" : ""} ${
-                      variantOutOfStock ? "variant-out-of-stock" : ""
-                    }`}
-                    title={variantOutOfStock ? "Out of stock" : `${getVariantLabel(variant)} - ₹${variant.price}`}
-                  >
-                    <input
-                      type="radio"
-                      name={`variant-${product.id}`}
-                      value={variant.id}
-                      checked={isSelected}
-                      onChange={() => setSelectedVariantId(String(variant.id))}
-                    />
-                    <span>{getVariantLabel(variant)}</span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
+              return (
+                <label
+                  key={variantId}
+                  className={`pack-option ${isSelected ? "active" : ""} ${variantOutOfStock ? "variant-out-of-stock" : ""}`}
+                  title={`${getVariantLabel(variant)}${variantOutOfStock ? " — Out of stock" : ""}`}
+                  onClick={(event) => event.stopPropagation()}
+                >
+                  <input
+                    type="radio"
+                    name={`variant-${product.id ?? product.slug ?? product.productName}`}
+                    value={variantId}
+                    checked={isSelected}
+                    onChange={() => setSelectedVariantId(variant.id != null ? String(variant.id) : "")}
+                    aria-label={getVariantLabel(variant)}
+                  />
+                  <span>{getVariantLabel(variant)}</span>
+                </label>
+              );
+            })}
+          </div>
 
-          {variants.length === 1 && (
-            <div className="gm-single-variant-hint">Pack size</div>
-          )}
           <div className={`gm-variant-stock ${outOfStock ? "is-out-of-stock" : "is-in-stock"}`}>
-            {outOfStock ? "Currently unavailable" : `${stock} in stock`}
+            {outOfStock ? "" : `${stock} in stock`}
           </div>
         </>
       ) : (
@@ -165,16 +168,9 @@ const ProductCard = ({ product }) => {
         onClick={useraddToCartHandler}
         type="button"
       >
-        {outOfStock ? (
-          "Out of Stock"
-        ) : (
-          <>
-            <ShoppingCart size={16} />
-            Add to Cart
-          </>
-        )}
+        {outOfStock ? "Out of Stock" : <><ShoppingCart size={17} /> Add to Cart</>}
       </button>
-    </div>
+    </article>
   );
 };
 
