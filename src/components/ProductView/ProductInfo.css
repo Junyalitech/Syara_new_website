@@ -612,3 +612,48 @@
     min-width: 110px;
   }
 }
+
+/* Compact bilingual description preview in the product detail panel */
+.product-desc-preview {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  line-height: 1.6;
+}
+.product-desc-preview p {
+  margin: 0;
+}
+.product-desc-preview p + p {
+  margin-top: 2px;
+}
+
+/* Main product detail preview: show complete sentences, never CSS-clip mid-sentence */
+.product-desc-preview {
+  display: block;
+  overflow: visible;
+  line-height: 1.6;
+}
+.product-desc-preview p {
+  margin: 0;
+}
+.product-desc-preview p + p {
+  margin-top: 3px;
+}
+
+
+.product-desc-preview {
+  display: block;
+  overflow: visible;
+  line-height: 1.6;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.product-desc-preview p {
+  margin: 0;
+}
+
+.product-desc-preview p + p {
+  margin-top: 4px;
+}

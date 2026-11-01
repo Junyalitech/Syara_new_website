@@ -24,11 +24,29 @@ const getVariantLabel = (variant?: Variant) => {
   const normalized = unit.toLowerCase();
   const displayUnit =
     normalized === "g" ? "g" :
-    normalized === "kg" ? "kg" :
-    normalized === "ml" ? "ml" :
-    normalized === "l" ? "L" :
-    normalized === "pc" || normalized === "pcs" ? "pcs" : unit;
-  return `${quantity}${displayUnit ? ` ${displayUnit}` : ""}`.trim();
+      normalized === "kg" ? "kg" :
+        normalized === "ml" ? "ml" :
+          normalized === "l" ? "L" :
+            normalized === "pc" || normalized === "pcs" ? "pcs" : unit;
+  const numericQuantity = Number(quantity);
+  const cleanQuantity =
+    normalized === "g" || normalized === "ml"
+      ? (Number.isFinite(numericQuantity) ? String(numericQuantity) : String(quantity)).replace(/\\.0+$/, "")
+      : String(quantity);
+  return `${cleanQuantity}${displayUnit ? displayUnit : ""}`.trim();
+};
+
+const SentencePreview = ({ text, lang }: { text: string; lang?: string }) => {
+  const sentences = String(text || "").match(/[^.!?।]+[.!?।]+|[^.!?।]+$/g) || [];
+  // Keep complete sentences only; the preview is intentionally concise.
+  let preview = "";
+  for (const sentence of sentences) {
+    const candidate = `${preview}${sentence.trim()} `;
+    if (preview && candidate.length > 190) break;
+    preview = candidate;
+    if (preview.length >= 135) break;
+  }
+  return <p lang={lang}>{preview.trim()}</p>;
 };
 
 const ProductInfo = ({ product, loading }: any) => {
@@ -136,6 +154,55 @@ const ProductInfo = ({ product, loading }: any) => {
     );
   }
 
+
+
+  const SentencePreview = ({
+    text,
+    lang,
+  }: {
+    text: string;
+    lang?: string;
+  }) => {
+    const description = String(text || "").trim();
+
+    if (!description) return null;
+
+    const words = description.match(/\S+/g) || [];
+
+    // If description has 60 words or fewer, check it directly.
+    const isLongDescription = words.length > 60;
+
+    // Take only the first 60 words.
+    const first60Words = words.slice(0, 60).join(" ");
+
+    // Find the last complete sentence within the first 60 words.
+    const sentenceEndings = /[.!?।]+(?=\s|$)/g;
+
+    let lastSentenceEnd = -1;
+    let match;
+
+    while ((match = sentenceEndings.exec(first60Words)) !== null) {
+      lastSentenceEnd = match.index + match[0].length;
+    }
+
+    let preview = "";
+
+    if (lastSentenceEnd !== -1) {
+      // A complete sentence exists within 60 words.
+      preview = first60Words.slice(0, lastSentenceEnd).trim();
+    } else if (isLongDescription) {
+      // No complete sentence within 60 words.
+      preview = first60Words.trim() + "...";
+    } else {
+      // Entire description is shorter than 60 words.
+      preview = description;
+    }
+
+    return <p lang={lang}>{preview}</p>;
+  };
+
+
+
   return (
     <div className="product-info">
       <div>
@@ -165,17 +232,11 @@ const ProductInfo = ({ product, loading }: any) => {
         )}
       </div>
 
-      <div className="stock">
-        {selectedVariant ? (
-          <>
-            <span className={outOfStock ? "stock-status out" : "stock-status in"}>
-              {outOfStock ? "Out of Stock" : `${stock} in stock`}
-            </span>
-          </>
-        ) : (
-          <span className="stock-status out">No variants available</span>
-        )}
-      </div>
+      {selectedVariant && outOfStock && (
+        <div className="stock">
+          <span className="stock-status out">Out of Stock</span>
+        </div>
+      )}
 
       <div className="package-select">
         <p>Select Pack:</p>
@@ -225,7 +286,23 @@ const ProductInfo = ({ product, loading }: any) => {
         )}
       </div>
 
-      <p className="product-desc">{product?.description || ""}</p>
+
+      <div className="product-desc product-desc-preview">
+        {product?.description && (
+          <SentencePreview
+            text={product.description}
+            lang="en"
+          />
+        )}
+
+        {product?.descriptionHindi && (
+          <SentencePreview
+            text={product.descriptionHindi}
+            lang="hi"
+          />
+        )}
+      </div>
+
 
       <div className="cart-section">
         <div className="qty-box" aria-label="Quantity">

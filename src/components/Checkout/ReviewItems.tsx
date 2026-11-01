@@ -5,15 +5,55 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { getCart, updateCartQty } from "../../features/cart/cartUtils";
 
+
+const formatPackageLabel = (label: string) => {
+  return label.replace(
+    /(\d+(?:\.\d+)?)\s*(g|gm|grams?)\b/gi,
+    (match, quantity, unit) => {
+      const numericQuantity = Number(quantity);
+
+      if (!Number.isFinite(numericQuantity)) {
+        return match;
+      }
+
+      return `${Math.trunc(numericQuantity)} ${unit}`;
+    }
+  );
+};
+
 const getVariantLabel = (item: any) => {
   const existing = String(item?.package || item?.pack || "").trim();
-  if (existing && !["1kg", "500gm"].includes(existing.toLowerCase())) return existing;
-  const quantity = item?.variantQuantity ?? item?.quantityValue ?? item?.variant?.quantity;
-  const unit = item?.unit ?? item?.variantUnit ?? item?.variant?.unit;
-  if (quantity != null && unit) return `${quantity} ${String(unit).trim()}`.trim();
-  if (existing) return existing;
+
+  if (
+    existing &&
+    !["1kg", "500gm"].includes(existing.toLowerCase())
+  ) {
+    return formatPackageLabel(existing);
+  }
+
+  const quantity =
+    item?.variantQuantity ??
+    item?.quantityValue ??
+    item?.variant?.quantity;
+
+  const unit =
+    item?.unit ??
+    item?.variantUnit ??
+    item?.variant?.unit;
+
+  if (quantity != null && unit) {
+    return formatPackageLabel(
+      `${quantity} ${String(unit).trim()}`.trim()
+    );
+  }
+
+  if (existing) {
+    return formatPackageLabel(existing);
+  }
+
   return "Pack size unavailable";
 };
+
 
 const getItemWeightKg = (item: any) => {
   const label = getVariantLabel(item).toLowerCase();

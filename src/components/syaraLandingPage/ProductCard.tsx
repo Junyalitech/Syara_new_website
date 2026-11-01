@@ -6,18 +6,32 @@ import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { addToCart } from "../../features/cart/cartUtils";
 
+
 const getVariantLabel = (variant) => {
   const quantity = variant?.quantity ?? "";
   const unit = String(variant?.unit ?? "").trim();
   const normalizedUnit = unit.toLowerCase();
+
+  const numericQuantity = Number(quantity);
+
+  // Remove decimal places only for gram quantities
+  const cleanQuantity =
+    normalizedUnit === "g" && Number.isFinite(numericQuantity)
+      ? String(Math.trunc(numericQuantity))
+      : String(quantity);
+
   const displayUnit =
     normalizedUnit === "g" ? "g" :
-    normalizedUnit === "kg" ? "kg" :
-    normalizedUnit === "ml" ? "ml" :
-    normalizedUnit === "l" ? "L" :
-    normalizedUnit === "pcs" || normalizedUnit === "pc" ? "pcs" : unit;
-  return `${quantity}${displayUnit ? ` ${displayUnit}` : ""}`.trim() || "Standard pack";
+      normalizedUnit === "kg" ? "kg" :
+        normalizedUnit === "ml" ? "ml" :
+          normalizedUnit === "l" ? "L" :
+            normalizedUnit === "pcs" || normalizedUnit === "pc" ? "pcs" :
+              unit;
+
+  return `${cleanQuantity}${displayUnit ? ` ${displayUnit}` : ""}`.trim()
+    || "Standard pack";
 };
+
 
 const money = (value) => Number(value || 0).toLocaleString("en-IN", {
   minimumFractionDigits: 2,
@@ -154,9 +168,9 @@ const ProductCard = ({ product }) => {
             })}
           </div>
 
-          <div className={`gm-variant-stock ${outOfStock ? "is-out-of-stock" : "is-in-stock"}`}>
+          {/* <div className={`gm-variant-stock ${outOfStock ? "is-out-of-stock" : "is-in-stock"}`}>
             {outOfStock ? "" : `${stock} in stock`}
-          </div>
+          </div> */}
         </>
       ) : (
         <div className="gm-variant-stock is-out-of-stock">No variants available</div>

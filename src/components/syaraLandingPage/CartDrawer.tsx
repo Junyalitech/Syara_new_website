@@ -39,13 +39,36 @@ interface CartDrawerProps {
   onRemove?: (id: number) => void;
 }
 
+
+const formatPackageLabel = (label: string) => {
+  return label.replace(
+    /(\d+(?:\.\d+)?)\s*(g)\b/gi,
+    (match, quantity, unit) => {
+      const numericQuantity = Number(quantity);
+
+      if (!Number.isFinite(numericQuantity)) {
+        return match;
+      }
+
+      return `${Math.trunc(numericQuantity)} ${unit}`;
+    }
+  );
+};
+
 const getPackageLabel = (item: CartItem) => {
-  if (item.package || item.pack) return String(item.package || item.pack);
-  if (item.variantQuantity != null) {
-    return `${item.variantQuantity} ${item.unit || ""}`.trim();
+  if (item.package || item.pack) {
+    return formatPackageLabel(String(item.package || item.pack));
   }
+
+  if (item.variantQuantity != null) {
+    return formatPackageLabel(
+      `${item.variantQuantity} ${item.unit || ""}`.trim()
+    );
+  }
+
   return "Pack size unavailable";
 };
+
 
 const getItemWeightKg = (item: CartItem) => {
   const label = getPackageLabel(item).toLowerCase();
@@ -193,6 +216,10 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
 
     onClose();
   };
+
+
+
+
 
   return (
     <>
