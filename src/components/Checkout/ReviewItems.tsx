@@ -16,7 +16,7 @@ const formatPackageLabel = (label: string) => {
         return match;
       }
 
-      return `${Math.trunc(numericQuantity)} ${unit}`;
+      return `${Number(numericQuantity.toFixed(3))}g`;
     }
   );
 };
@@ -56,7 +56,7 @@ const getVariantLabel = (item: any) => {
 
 
 const getItemWeightKg = (item: any) => {
-  const label = getVariantLabel(item).toLowerCase();
+  const label = getVariantLabel(getVariantLabel(item)).toLowerCase();
   const match = label.match(/(\d+(?:\.\d+)?)\s*(kg|g|gm|l|ml)\b/);
   if (match) {
     const amount = Number(match[1]);

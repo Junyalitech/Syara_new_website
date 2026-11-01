@@ -40,9 +40,23 @@ interface CartDrawerProps {
 }
 
 
+
+const getPackageLabel = (item: CartItem) => {
+  if (item.package || item.pack) {
+    return String(item.package || item.pack).trim();
+  }
+
+  if (item.variantQuantity != null) {
+    return `${item.variantQuantity} ${item.unit || ""}`.trim();
+  }
+
+  return "Pack size unavailable";
+};
+
+// Only for UI display
 const formatPackageLabel = (label: string) => {
   return label.replace(
-    /(\d+(?:\.\d+)?)\s*(g)\b/gi,
+    /(\d+(?:\.\d+)?)\s*(g|gm|gram|grams)\b/gi,
     (match, quantity, unit) => {
       const numericQuantity = Number(quantity);
 
@@ -50,24 +64,11 @@ const formatPackageLabel = (label: string) => {
         return match;
       }
 
-      return `${Math.trunc(numericQuantity)} ${unit}`;
+      return `${Number(numericQuantity.toFixed(3))}g`;
     }
   );
 };
 
-const getPackageLabel = (item: CartItem) => {
-  if (item.package || item.pack) {
-    return formatPackageLabel(String(item.package || item.pack));
-  }
-
-  if (item.variantQuantity != null) {
-    return formatPackageLabel(
-      `${item.variantQuantity} ${item.unit || ""}`.trim()
-    );
-  }
-
-  return "Pack size unavailable";
-};
 
 
 const getItemWeightKg = (item: CartItem) => {
@@ -249,7 +250,7 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
               const stockKnown = item.stock !== undefined && item.stock !== null && item.stock !== "";
               const stock = stockKnown ? Number(item.stock) : null;
               const itemPrice = Number(item.sellingPrice ?? item.price ?? 0);
-              const label = getPackageLabel(item);
+              const label =  formatPackageLabel(getPackageLabel(item));
 
               return (
                 <div key={key} className="cd-item">
