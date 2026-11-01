@@ -44,17 +44,20 @@ export const addToCart = (item) => {
   const cart = getCart();
 
   const productId = item.productId ?? item.id;
+  const variantId = item.variantId ?? null;
   const packageLabel = String(item.package ?? item.pack ?? "");
 
+  // Match by product + variant, not package text
   const existingIndex = cart.findIndex(
-    (existing) =>
-      Number(existing.productId ?? existing.id) === Number(productId) &&
-      String(existing.package ?? existing.pack ?? "") === packageLabel
+    (cartItem) =>
+      String(cartItem.productId ?? cartItem.id) === String(productId) &&
+      String(cartItem.variantId ?? "") === String(variantId ?? "")
   );
 
   if (existingIndex !== -1) {
     const existingItem = cart[existingIndex];
 
+    // Preserve the existing behavior
     if (Number(existingItem.quantity) === Number(item.quantity)) {
       return { error: "Product already in cart" };
     }
@@ -63,17 +66,33 @@ export const addToCart = (item) => {
       ...existingItem,
       ...item,
       productId,
+      variantId,
       package: packageLabel,
     };
 
     saveCart(cart);
-    return { success: true, updated: true, cart };
+
+    return {
+      success: true,
+      updated: true,
+      cart,
+    };
   }
 
-  cart.push({ ...item, productId, package: packageLabel });
+  cart.push({
+    ...item,
+    productId,
+    variantId,
+    package: packageLabel,
+  });
+
   saveCart(cart);
 
-  return { success: true, updated: false, cart };
+  return {
+    success: true,
+    updated: false,
+    cart,
+  };
 };
 
 export const updateCartQty = (productId, packageLabel, quantity) => {
@@ -81,7 +100,7 @@ export const updateCartQty = (productId, packageLabel, quantity) => {
 
   const updated = cart.map((item) =>
     Number(item.productId ?? item.id) === Number(productId) &&
-    String(item.package ?? item.pack ?? "") === String(packageLabel)
+      String(item.package ?? item.pack ?? "") === String(packageLabel)
       ? { ...item, quantity: Number(quantity) }
       : item
   );
