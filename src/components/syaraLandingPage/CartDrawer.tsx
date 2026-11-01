@@ -177,7 +177,8 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
     toast.success("Item removed from cart");
   };
 
-  const proceed = async () => {
+
+  const proceed = () => {
     if (totalCartWeightKg > 20) {
       setBulkOrderOpen(true);
       return;
@@ -185,21 +186,21 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
 
     const userId = localStorage.getItem("syaraid");
     const currentCart = getCart() as CartItem[];
-    onClose();
 
+    // Background sync without waiting
     if (userId) {
-      try {
-        setSaving(true);
-        await dispatch(syncCartAPI({ userId, items: currentCart }) as any);
-      } catch (error) {
+      void dispatch(
+        syncCartAPI({ userId, items: currentCart }) as any
+      ).catch((error: unknown) => {
         console.error("Cart sync failed:", error);
-      } finally {
-        setSaving(false);
-      }
+      });
     }
 
+    // Close drawer and navigate immediately
+    onClose();
     navigate("/checkout");
   };
+
 
   const loggedin = Boolean(localStorage.getItem("syaraid"));
 
@@ -250,7 +251,7 @@ const CartDrawer = ({ open, onClose }: CartDrawerProps) => {
               const stockKnown = item.stock !== undefined && item.stock !== null && item.stock !== "";
               const stock = stockKnown ? Number(item.stock) : null;
               const itemPrice = Number(item.sellingPrice ?? item.price ?? 0);
-              const label =  formatPackageLabel(getPackageLabel(item));
+              const label = formatPackageLabel(getPackageLabel(item));
 
               return (
                 <div key={key} className="cd-item">
